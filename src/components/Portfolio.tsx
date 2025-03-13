@@ -20,6 +20,15 @@ import {
   ChevronDown,
   ChevronUp,
   Star,
+  CheckCircle,
+  Folder,
+  FolderKanban,
+  Code2,
+  BarChart,
+  LineChart,
+  Sun,
+  Moon,
+  BarChart2,
 } from "lucide-react";
 import {
   Card,
@@ -27,6 +36,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import ChatBot from "./ChatBot";
 import { motion, AnimatePresence } from "framer-motion";
@@ -84,36 +94,76 @@ const TypeWriter = ({
   );
 };
 
-// Add particle effect component
+// Simplified section variants with minimal animation
+const sectionVariants = {
+  hidden: {
+    opacity: 0.9,
+    y: 10,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+    },
+  },
+};
+
+// Simplified card variants
+const cardVariants = {
+  initial: { opacity: 1 },
+  hover: {
+    scale: 1.02,
+    transition: { duration: 0.2 },
+  },
+};
+
+// Simplified scroll reveal animation
+const revealVariants = {
+  hidden: {
+    opacity: 0.9,
+    y: 20,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.4,
+      ease: "easeOut",
+    },
+  },
+};
+
+// Reduce particle count and slow down animations
 const ParticleBackground = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20" />
-      {Array.from({ length: 50 }).map((_, i) => (
+      <div
+        className="absolute inset-0 bg-center opacity-10"
+        style={{
+          backgroundImage: 'url("/grid.svg")',
+          backgroundSize: "20px 20px",
+          backgroundRepeat: "repeat",
+        }}
+      />
+      {Array.from({ length: 20 }).map((_, i) => (
         <motion.div
           key={i}
           className="absolute w-1 h-1 bg-green-400 rounded-full"
           initial={{
             x: Math.random() * 100 + "%",
             y: Math.random() * 100 + "%",
-            scale: Math.random() * 0.5 + 0.5,
-            opacity: Math.random() * 0.5 + 0.25,
+            scale: Math.random() * 0.3 + 0.2,
+            opacity: 0.2,
           }}
           animate={{
-            x: [
-              Math.random() * 100 + "%",
-              Math.random() * 100 + "%",
-              Math.random() * 100 + "%",
-            ],
-            y: [
-              Math.random() * 100 + "%",
-              Math.random() * 100 + "%",
-              Math.random() * 100 + "%",
-            ],
-            opacity: [0.25, 0.5, 0.25],
+            x: [Math.random() * 100 + "%", Math.random() * 100 + "%"],
+            y: [Math.random() * 100 + "%", Math.random() * 100 + "%"],
+            opacity: [0.2, 0.3, 0.2],
           }}
           transition={{
-            duration: Math.random() * 10 + 20,
+            duration: 30,
             repeat: Infinity,
             ease: "linear",
           }}
@@ -122,6 +172,30 @@ const ParticleBackground = () => {
     </div>
   );
 };
+
+// Update the project interface/type to include the missing properties
+interface Project {
+  title: string;
+  description: string;
+  tags: string[];
+  technologies?: string[];
+  image?: string;
+  link: string;
+  github?: string;
+  demo?: string;
+  category?: string;
+  stats: {
+    stars: number;
+    forks: number;
+  };
+}
+
+// Add SkillCategory interface
+interface SkillCategory {
+  name: string;
+  items: string[];
+  icon?: React.ComponentType<{ size: number }>;
+}
 
 const Portfolio = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -137,18 +211,6 @@ const Portfolio = () => {
   const [visibleSection, setVisibleSection] = useState<string | null>(null);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
-  // Section visibility animation
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
-  };
-
-  // Card hover animation
-  const cardVariants = {
-    hover: { scale: 1.03, transition: { duration: 0.1 } },
-    tap: { scale: 0.95 },
-  };
-
   // Add rotating titles for the header
   const developerTitles = [
     "Developer",
@@ -157,19 +219,6 @@ const Portfolio = () => {
     "Problem Solver",
     "Tech Enthusiast",
   ];
-
-  // Add scroll reveal animation
-  const revealVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  };
 
   // Add hover effect for cards
   const cardHoverVariants = {
@@ -193,7 +242,7 @@ const Portfolio = () => {
       };
 
       const duration = 2000;
-      const steps = 50;
+      const steps = 30;
       const interval = duration / steps;
 
       let currentStep = 0;
@@ -201,7 +250,7 @@ const Portfolio = () => {
       const timer = setInterval(() => {
         currentStep++;
         const progress = currentStep / steps;
-        const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic easing
+        const easeProgress = 1 - Math.pow(1 - progress, 2); // Quadratic easing
 
         setStats({
           projects: Math.floor(targetStats.projects * easeProgress),
@@ -276,46 +325,62 @@ const Portfolio = () => {
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, []);
 
-  const projects = [
+  // Update the projects array to match the Project interface
+  const projects: Project[] = [
     {
       title: "AI-Powered Analytics Dashboard",
       description:
         "Real-time data visualization platform with machine learning insights",
       tags: ["React", "Python", "TensorFlow", "AWS"],
-      image: "/projects/analytics.jpg",
+      technologies: ["React", "Python", "TensorFlow", "AWS"],
+      image: "/project-1.jpg",
       link: "#",
-      github: "#",
+      github: "https://github.com/yourusername/project1",
+      demo: "https://demo.example.com/project1",
+      category: "Web App",
       stats: {
-        stars: 128,
-        forks: 34,
+        stars: 45,
+        forks: 12,
       },
     },
     {
       title: "Blockchain Trading Platform",
       description: "Decentralized exchange with smart contract integration",
       tags: ["Solidity", "Web3.js", "Node.js", "MongoDB"],
+      technologies: ["Solidity", "Web3.js", "Node.js", "MongoDB"],
+      image: "/project-2.jpg",
       link: "#",
+      github: "https://github.com/yourusername/project2",
+      demo: "https://demo.example.com/project2",
+      category: "DeFi",
       stats: {
-        stars: 89,
-        forks: 23,
+        stars: 32,
+        forks: 8,
       },
     },
     {
       title: "IoT Device Management System",
       description: "Cloud-based platform for managing IoT devices at scale",
       tags: ["React", "Node.js", "MQTT", "Azure"],
+      technologies: ["React", "Node.js", "MQTT", "Azure"],
+      image: "/project-3.jpg",
       link: "#",
+      github: "https://github.com/yourusername/project3",
+      demo: "https://demo.example.com/project3",
+      category: "IoT",
       stats: {
-        stars: 156,
-        forks: 45,
+        stars: 28,
+        forks: 5,
       },
     },
   ];
 
-  const skills = [
+  // Update skills array to use the interface
+  const skills: SkillCategory[] = [
     {
-      name: "Frontend Development",
-      items: ["React", "Vue.js", "TypeScript", "Tailwind CSS"],
+      name: "Frontend",
+      items: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+      icon: Code,
     },
     {
       name: "Backend Development",
@@ -355,82 +420,56 @@ const Portfolio = () => {
 
       {/* Enhanced Navigation */}
       <motion.nav
+        className="fixed top-0 left-0 right-0 z-50 px-4 py-3"
+        style={{ backgroundColor: "#432c74" }}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-        className="bg-gray-900/90 backdrop-blur-md dark:bg-gray-800/90 text-white p-4 fixed w-full z-40 shadow-lg"
+        transition={{ duration: 0.5 }}
       >
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <motion.a
             href="#"
-            className="text-xl font-bold flex items-center"
+            className="text-xl font-bold flex items-center gap-2"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Terminal className="mr-2 text-green-400" />
-            <span className="bg-gradient-to-r from-blue-400 to-green-400 text-transparent bg-clip-text">
-              Gloire <TypeWriter words={developerTitles} text="Developer" />
+            <span className="bg-[#8050e3] text-white p-2 rounded-lg">
+              <Code size={20} />
             </span>
+            <span className="text-white">Gloire Develope</span>
           </motion.a>
 
-          <button
-            className="lg:hidden hover:text-green-400 transition-colors"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-
-          <div className="hidden lg:flex space-x-8">
+          <div className="hidden md:flex items-center space-x-6">
             {["home", "about", "projects", "skills", "contact"].map(
               (section) => (
-                <a
+                <motion.a
                   key={section}
                   href={`#${section}`}
-                  className={`hover:text-green-400 transition-colors capitalize ${
+                  className={`nav-item ${
                     activeSection === section
-                      ? "text-green-400 border-b-2 border-green-400"
-                      : ""
+                      ? "nav-item-active"
+                      : "text-white hover:text-indigo-200"
                   }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
                   {section}
-                </a>
+                </motion.a>
               )
             )}
           </div>
 
-          {/* Add theme toggle and keyboard shortcuts */}
-          <div className="flex items-center space-x-4">
-            <button
+          <div className="flex items-center gap-3">
+            <motion.button
               onClick={toggleTheme}
-              className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-              aria-label="Toggle theme"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-orange-400 text-white"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
             >
-              {theme === "light" ? "🌙" : "☀️"}
-            </button>
-            <span className="text-sm text-gray-400">
-              Press Ctrl + K to search
-            </span>
+              {theme === "light" ? <Sun size={18} /> : <Moon size={18} />}
+            </motion.button>
           </div>
         </div>
-
-        {isMenuOpen && (
-          <div className="lg:hidden mt-4 space-y-4 text-center animate-fadeIn">
-            {["home", "about", "projects", "skills", "contact"].map(
-              (section) => (
-                <a
-                  key={section}
-                  href={`#${section}`}
-                  className={`block py-2 hover:text-green-400 transition-colors capitalize ${
-                    activeSection === section ? "text-green-400" : ""
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {section}
-                </a>
-              )
-            )}
-          </div>
-        )}
       </motion.nav>
 
       {/* Hero Section with Enhanced Parallax and Particles */}
@@ -439,131 +478,167 @@ const Portfolio = () => {
         initial="hidden"
         animate={visibleSection === "home" ? "visible" : "hidden"}
         variants={sectionVariants}
-        className="relative pt-24 pb-12 px-4 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen flex items-center overflow-hidden"
+        className="relative pt-28 pb-16 px-4 bg-[#432c74] text-white min-h-screen flex items-center"
       >
         <ParticleBackground />
 
-        <div className="max-w-6xl mx-auto text-center relative z-10">
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
-          >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Full Stack Developer
-              <motion.span
-                className="block mt-2 bg-gradient-to-r from-blue-400 via-green-400 to-purple-400 text-transparent bg-clip-text"
-                animate={{
-                  backgroundPosition: ["0%", "100%"],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                }}
-              >
-                Crafting Digital Excellence
-              </motion.span>
+              className="text-left"
+            >
+              <h1 className="text-5xl md:text-7xl font-bold mb-6">
+                Developer<span className="text-indigo-400">|</span>
             </h1>
-
-            {/* Enhanced Stats Cards with 3D effect */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              {[
-                { icon: Briefcase, label: "Projects", value: stats.projects },
-                { icon: Clock, label: "Years", value: stats.experience },
-                { icon: Coffee, label: "Coffees", value: stats.coffee },
-                { icon: Code, label: "Commits", value: stats.commits },
-              ].map((stat, index) => (
-                <motion.div
-                  key={index}
-                  whileHover={{
-                    scale: 1.05,
-                    rotateY: 10,
-                    rotateX: 10,
-                    z: 50,
-                  }}
+              <p className="text-xl text-gray-200 mb-8">
+                I create elegant, high-performance web applications with modern
+                technologies. Let's build something amazing together.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <motion.a
+                  href="#projects"
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="transform perspective-1000"
+                  className="primary-button"
                 >
-                  <Card className="bg-gray-800/50 backdrop-blur-md border-none hover:bg-gray-700/50 transition-all duration-300 transform-gpu">
-                    <CardContent className="p-4 text-center">
+                  View My Work
+                </motion.a>
+                <motion.a
+                  href="#contact"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="secondary-button"
+                >
+                  Contact Me
+                </motion.a>
+              </div>
+            </motion.div>
+
+                <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="glassmorphic p-8 rounded-3xl"
+            >
+              <div className="grid grid-cols-3 gap-6">
+                {[
+                  {
+                    name: "Assets",
+                    icon: Folder,
+                    className: "icon-button-assets",
+                  },
+                  {
+                    name: "Projects",
+                    icon: LineChart,
+                    className: "icon-button-projects",
+                  },
+                  {
+                    name: "Skills",
+                    icon: Code,
+                    className: "icon-button-skills",
+                  },
+                  {
+                    name: "Record",
+                    icon: BarChart,
+                    className: "icon-button-record",
+                  },
+                  {
+                    name: "Results",
+                    icon: BarChart2,
+                    className: "icon-button-results",
+                  },
+                  {
+                    name: "Contact",
+                    icon: Mail,
+                    className: "icon-button-contact",
+                  },
+                ].map((item, index) => (
+                  <motion.a
+                  key={index}
+                    href={`#${item.name.toLowerCase()}`}
+                    className="flex flex-col items-center gap-2"
+                    whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  >
+                    <div className={`icon-button ${item.className}`}>
+                      <item.icon size={24} className="text-white" />
+                    </div>
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </motion.a>
+                ))}
+              </div>
+
+              <div className="mt-8">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-semibold">My Docs</h3>
+                  <span className="text-xs text-gray-300">40 GB free</span>
+                </div>
+                <div className="w-full h-2 bg-purple-600/30 rounded-full overflow-hidden">
                       <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <stat.icon className="w-8 h-8 text-green-400 mx-auto mb-2" />
+                    className="h-full bg-[#8050e3]"
+                    initial={{ width: "0%" }}
+                    animate={{ width: "65%" }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                  ></motion.div>
+                </div>
+              </div>
                       </motion.div>
-                      <motion.h3
-                        className="text-2xl font-bold text-white"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.2 }}
-                      >
-                        {stat.value}+
-                      </motion.h3>
-                      <p className="text-gray-400">{stat.label}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
             </div>
 
-            {/* Enhanced Social Links with tooltips */}
+          {/* Stats section */}
             <motion.div
-              className="flex justify-center space-x-6"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-            >
-              {[
-                { icon: Github, link: "#", label: "GitHub" },
-                { icon: Linkedin, link: "#", label: "LinkedIn" },
-                { icon: Mail, link: "#", label: "Email" },
-              ].map((social, index) => (
-                <motion.a
-                  key={index}
-                  href={social.link}
-                  whileHover={{
-                    scale: 1.2,
-                    rotate: 5,
-                    color: "#4ade80",
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                  className="text-gray-400 hover:text-green-400 transition-all relative group"
+            transition={{ delay: 1, duration: 0.8 }}
+            className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto"
+          >
+            {[
+              { key: "projects", value: 15, label: "Projects" },
+              { key: "experience", value: "5+", label: "Experience" },
+              { key: "coffee", value: 1482, label: "Cups Of Coffee" },
+              { key: "commits", value: 3267, label: "Commits" },
+            ].map((stat, index) => (
+              <motion.div
+                key={stat.key}
+                whileHover={{ y: -5, scale: 1.05 }}
+                className="stats-card"
+              >
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="text-3xl font-bold text-gray-800 mb-1"
                 >
-                  <social.icon size={24} />
-                  <motion.span
-                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100"
-                    initial={{ y: 10 }}
-                    animate={{ y: 0 }}
-                  >
-                    {social.label}
-                  </motion.span>
-                </motion.a>
-              ))}
+                  {stat.value}
             </motion.div>
+                <div className="text-sm text-gray-500">{stat.label}</div>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
 
-        {/* Enhanced Scroll Indicator */}
+        {/* Scroll indicator */}
         <motion.div
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-          animate={{
-            y: [0, 10, 0],
-            opacity: [0.5, 1, 0.5],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
         >
-          <ChevronDown className="w-6 h-6 text-gray-400" />
+          <ChevronDown className="w-6 h-6 text-white/70" />
         </motion.div>
       </motion.section>
 
       {/* About Section */}
-      <section id="about" className="py-16 px-4 bg-white">
+      <motion.section
+        id="about"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={sectionVariants}
+        className="py-16 px-4 bg-white relative z-10"
+      >
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
             About Me
@@ -611,94 +686,200 @@ const Portfolio = () => {
             </CardContent>
           </Card>
         </div>
-      </section>
+      </motion.section>
 
       {/* Projects Section */}
       <motion.section
         id="projects"
         initial="hidden"
-        animate={visibleSection === "projects" ? "visible" : "hidden"}
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
         variants={sectionVariants}
-        className="py-16 px-4 bg-gray-50 dark:bg-gray-900"
+        className="py-16 px-4 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 relative z-10"
       >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="inline-block px-3 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300 rounded-full text-sm font-medium mb-3">
+                PORTFOLIO
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
             Featured Projects
           </h2>
+              <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Explore my latest work and see how I solve complex problems with
+                clean, efficient code.
+              </p>
+            </motion.div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {projects.map((project, index) => (
-              <Card
+              <motion.div
                 key={index}
-                className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold flex items-center justify-between">
+                <div className="glassmorphic-card h-full flex flex-col overflow-hidden">
+                  <div className="h-48 overflow-hidden">
+                    <img
+                      src={project.image || "/project-1.jpg"}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                    />
+                  </div>
+                  <div className="p-6">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                     {project.title}
-                    <a
-                      href={project.link}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      <ExternalLink size={20} />
-                    </a>
-                  </CardTitle>
-                  <CardDescription>{project.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
+                      </h3>
+                      <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white text-xs px-2 py-1 rounded-full">
+                        {project.category || "Web App"}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                      {project.description}
+                    </p>
+                    <div className="mt-auto">
                   <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tags.map((tag, tagIndex) => (
+                        {project.technologies?.map((tech, i) => (
                       <span
-                        key={tagIndex}
-                        className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+                            key={i}
+                            className="text-xs bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-2 py-1 rounded-full"
                       >
-                        {tag}
+                            {tech}
                       </span>
                     ))}
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>⭐ {project.stats.stars} stars</span>
-                    <span>🔄 {project.stats.forks} forks</span>
+                      <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <a
+                          href={project.link || "#"}
+                          className="text-indigo-600 dark:text-indigo-400 text-sm font-medium hover:underline"
+                        >
+                          View Project
+                        </a>
+                        <div className="flex gap-2">
+                          <a
+                            href={project.github || "#"}
+                            className="icon-button bg-gradient-to-r from-gray-700 to-gray-900 text-white w-8 h-8"
+                          >
+                            <Github size={14} />
+                          </a>
+                          <a
+                            href={project.demo || "#"}
+                            className="icon-button bg-gradient-to-r from-indigo-500 to-purple-500 text-white w-8 h-8"
+                          >
+                            <ExternalLink size={14} />
+                          </a>
                   </div>
-                </CardContent>
-              </Card>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
             ))}
+          </div>
+
+          <div className="text-center mt-12">
+            <motion.a
+              href="https://github.com/yourusername"
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="glassmorphic-button inline-flex items-center gap-2 bg-gradient-to-r from-gray-800 to-gray-900 text-white px-6 py-3 font-medium"
+            >
+              <Github size={18} />
+              See More on GitHub
+            </motion.a>
           </div>
         </div>
       </motion.section>
 
       {/* Skills Section */}
-      <section id="skills" className="py-16 px-4 bg-white">
+      <motion.section
+        id="skills"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={sectionVariants}
+        className="py-16 px-4 bg-gradient-to-b from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 relative z-10"
+      >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Skills & Expertise
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="inline-block px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full text-sm font-medium mb-3">
+                EXPERTISE
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Skills & Technologies
           </h2>
+              <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                I specialize in building modern web applications with these
+                technologies.
+              </p>
+            </motion.div>
+          </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {skills.map((category, index) => (
-              <Card
+              <motion.div
                 key={index}
-                className="bg-white shadow-lg hover:shadow-xl transition-all duration-300"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold text-gray-800">
+                <Card className="bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-200 h-full border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                  <CardHeader className="pb-2 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700">
+                    <div className="flex items-center gap-3">
+                      {category.icon && (
+                        <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
+                          <category.icon size={20} />
+                        </div>
+                      )}
+                      <CardTitle className="text-lg font-bold text-gray-900 dark:text-white">
                     {category.name}
                   </CardTitle>
+                    </div>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {category.items.map((skill, skillIndex) => (
-                      <div
-                        key={skillIndex}
-                        className="bg-gray-50 p-2 rounded-lg hover:bg-green-50 transition-colors"
-                      >
+                  <CardContent className="pt-4">
+                    <ul className="space-y-2">
+                      {category.items.map((skill, i) => (
+                        <motion.li
+                          key={i}
+                          initial={{ opacity: 0, x: -10 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.3, delay: i * 0.05 }}
+                          className="flex items-center gap-2"
+                        >
+                          <CheckCircle size={16} className="text-green-500" />
+                          <span className="text-gray-700 dark:text-gray-300">
                         {skill}
-                      </div>
+                          </span>
+                        </motion.li>
                     ))}
-                  </div>
+                    </ul>
                 </CardContent>
               </Card>
+              </motion.div>
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Testimonials Section */}
       <section className="py-16 px-4 bg-gray-50">
@@ -735,63 +916,156 @@ const Portfolio = () => {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 px-4 bg-gray-900 text-white">
+      <motion.section
+        id="contact"
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, margin: "-100px" }}
+        variants={sectionVariants}
+        className="py-16 px-4 bg-gradient-to-b from-gray-900 to-gray-800 text-white relative z-10"
+      >
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">
+          <div className="text-center mb-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+            >
+              <span className="inline-block px-3 py-1 bg-purple-900 text-purple-300 rounded-full text-sm font-medium mb-3">
+                GET IN TOUCH
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
             Let's Work Together
           </h2>
-          <Card className="bg-gray-800 border-none max-w-2xl mx-auto">
+              <p className="text-gray-300 max-w-2xl mx-auto">
+                Have a project in mind or want to discuss opportunities? I'd
+                love to hear from you.
+              </p>
+            </motion.div>
+          </div>
+
+          <Card className="bg-gray-800 border-none max-w-2xl mx-auto transition-shadow duration-200 hover:shadow-xl rounded-xl overflow-hidden border border-gray-700">
             <CardContent className="p-8">
               <div className="grid gap-6">
-                <div className="flex items-center space-x-4">
-                  <Mail className="w-6 h-6 text-green-400" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <h3 className="font-bold">Email</h3>
-                    <a
-                      href="mailto:contact@example.com"
-                      className="text-gray-300 hover:text-green-400 transition-colors"
+                    <label
+                      htmlFor="name"
+                      className="block text-sm font-medium text-gray-300 mb-1"
                     >
-                      contact@example.com
-                    </a>
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                      placeholder="Your name"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-gray-300 mb-1"
+                    >
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                      placeholder="your@email.com"
+                    />
                   </div>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <Linkedin className="w-6 h-6 text-green-400" />
                   <div>
-                    <h3 className="font-bold">LinkedIn</h3>
-                    <a
-                      href="#"
-                      className="text-gray-300 hover:text-green-400 transition-colors"
-                    >
-                      /in/johndeveloper
-                    </a>
+                  <label
+                    htmlFor="subject"
+                    className="block text-sm font-medium text-gray-300 mb-1"
+                  >
+                    Subject
+                  </label>
+                  <input
+                    type="text"
+                    id="subject"
+                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                    placeholder="How can I help you?"
+                  />
                   </div>
+                <div>
+                  <label
+                    htmlFor="message"
+                    className="block text-sm font-medium text-gray-300 mb-1"
+                  >
+                    Message
+                  </label>
+                  <textarea
+                    id="message"
+                    rows={4}
+                    className="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+                    placeholder="Tell me about your project..."
+                  ></textarea>
                 </div>
-                <div className="flex items-center space-x-4">
-                  <Github className="w-6 h-6 text-green-400" />
-                  <div>
-                    <h3 className="font-bold">GitHub</h3>
-                    <a
-                      href="#"
-                      className="text-gray-300 hover:text-green-400 transition-colors"
-                    >
-                      @johndeveloper
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-8 text-center">
-                <a
-                  href="mailto:contact@example.com"
-                  className="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  Get In Touch <Mail size={20} className="ml-2" />
-                </a>
+                  Send Message
+                </motion.button>
               </div>
             </CardContent>
           </Card>
+
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            <motion.a
+              href="mailto:your@email.com" // Replace with your email
+              whileHover={{ y: -5 }}
+              className="flex flex-col items-center p-6 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 hover:border-indigo-500 transition-all"
+            >
+              <div className="p-3 rounded-full bg-indigo-900/50 mb-4">
+                <Mail size={24} className="text-indigo-400" />
         </div>
-      </section>
+              <h3 className="text-lg font-medium mb-1">Email</h3>
+              <p className="text-gray-400 text-sm text-center">
+                your@email.com
+              </p>
+            </motion.a>
+
+            <motion.a
+              href="https://linkedin.com/in/yourusername" // Replace with your LinkedIn
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ y: -5 }}
+              className="flex flex-col items-center p-6 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 hover:border-indigo-500 transition-all"
+            >
+              <div className="p-3 rounded-full bg-indigo-900/50 mb-4">
+                <Linkedin size={24} className="text-indigo-400" />
+              </div>
+              <h3 className="text-lg font-medium mb-1">LinkedIn</h3>
+              <p className="text-gray-400 text-sm text-center">
+                Connect with me
+              </p>
+            </motion.a>
+
+            <motion.a
+              href="https://github.com/yourusername" // Replace with your GitHub
+              target="_blank"
+              rel="noopener noreferrer"
+              whileHover={{ y: -5 }}
+              className="flex flex-col items-center p-6 bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 hover:border-indigo-500 transition-all"
+            >
+              <div className="p-3 rounded-full bg-indigo-900/50 mb-4">
+                <Github size={24} className="text-indigo-400" />
+              </div>
+              <h3 className="text-lg font-medium mb-1">GitHub</h3>
+              <p className="text-gray-400 text-sm text-center">
+                Check out my code
+              </p>
+            </motion.a>
+          </div>
+        </div>
+      </motion.section>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-8 px-4 border-t border-gray-800">
@@ -888,10 +1162,12 @@ const Portfolio = () => {
         </div>
       </footer>
 
-      {/* ChatBot */}
+      {/* ChatBot - Updated positioning */}
+      <div className="fixed bottom-4 right-4 z-50">
       <ChatBot />
+      </div>
 
-      {/* Enhanced Scroll to Top Button */}
+      {/* Enhanced Scroll to Top Button - Adjusted position */}
       <AnimatePresence>
         {scrollProgress > 20 && (
           <motion.button
@@ -901,7 +1177,7 @@ const Portfolio = () => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="fixed bottom-20 right-4 p-3 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-full shadow-lg"
+            className="fixed bottom-24 right-4 p-3 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-full shadow-lg z-50"
           >
             <ChevronUp className="w-6 h-6" />
           </motion.button>

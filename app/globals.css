@@ -3,24 +3,39 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #432c74;
+  --foreground: #ffffff;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --card-border: rgba(255, 255, 255, 0.1);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  --accent-blue: #4d83f7;
+  --accent-purple: #8050e3;
+  --accent-pink: #e46cac;
+  --accent-green: #4fdba6;
+  --accent-yellow: #f5a742;
+  --icon-bg-assets: #f5a742;
+  --icon-bg-projects: #4d83f7;
+  --icon-bg-skills: #4fdba6;
+  --icon-bg-record: #e46cac;
+  --icon-bg-results: #8050e3;
+  --icon-bg-contact: #4d83f7;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #432c74;
+    --foreground: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.90);
+    --card-border: rgba(255, 255, 255, 0.1);
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   }
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Inter', Arial, Helvetica, sans-serif;
 }
-
-
 
 @layer base {
   :root {
@@ -78,13 +93,110 @@ body {
   }
 }
 
-
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .glassmorphic {
+    @apply bg-white/90 backdrop-blur-lg border border-white/10 rounded-3xl shadow-xl;
+  }
+  
+  .glassmorphic-card {
+    @apply bg-white/90 backdrop-blur-md border border-white/10 rounded-3xl shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02];
+  }
+  
+  .glassmorphic-button {
+    @apply bg-white/20 backdrop-blur-md border border-white/20 rounded-full shadow-md transition-all duration-300 hover:shadow-lg hover:scale-105;
+  }
+  
+  .icon-button {
+    @apply flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-110;
+  }
+  
+  .icon-button-assets {
+    @apply bg-[#f5a742];
+  }
+  
+  .icon-button-projects {
+    @apply bg-[#4d83f7];
+  }
+  
+  .icon-button-skills {
+    @apply bg-[#4fdba6];
+  }
+  
+  .icon-button-record {
+    @apply bg-[#e46cac];
+  }
+  
+  .icon-button-results {
+    @apply bg-[#8050e3];
+  }
+  
+  .icon-button-contact {
+    @apply bg-[#4d83f7];
+  }
+  
+  .stats-card {
+    @apply bg-white/90 backdrop-blur-md border border-white/10 rounded-3xl shadow-lg p-6;
+  }
+  
+  .primary-button {
+    @apply bg-[#8050e3] text-white rounded-full px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:bg-[#6f40ce];
+  }
+  
+  .secondary-button {
+    @apply bg-white/20 text-white rounded-full px-8 py-3 font-medium shadow-md hover:shadow-lg hover:bg-white/30 transition-all duration-300;
+  }
+  
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r;
+  }
+
+  .primary-gradient {
+    @apply bg-gradient-to-r from-[#8050e3] to-[#5d2ec2];
+  }
+
+  .nav-item {
+    @apply py-2 px-4 rounded-full transition-colors capitalize;
+  }
+
+  .nav-item-active {
+    @apply bg-[#8050e3] text-white;
+  }
+}
+
+@layer utilities {
+  * {
+    /* Reduce default transition duration */
+    transition-duration: 150ms !important;
+  }
+
+  /* Optimize animations for performance */
+  .animate-optimized {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  /* Reduce motion when user prefers it */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .animate-optimized {
+      transform: none !important;
+      transition: none !important;
+    }
   }
 }

@@ -57,7 +57,7 @@ export default async function handler(
     const { message } = req.body;
 
     // Call the Gemini API
-    const response = await fetch(`https://actual-gemini-api-endpoint`, {
+    const response = await fetch(`https://your-actual-gemini-api-endpoint`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

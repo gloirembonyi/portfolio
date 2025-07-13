@@ -1,912 +1,1007 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import {
   Github,
   Linkedin,
   Mail,
-  ExternalLink,
   Menu,
   X,
   Code,
   BookOpen,
   Briefcase,
-  Award,
-  Terminal,
-  Clock,
   User,
-  Coffee,
-  Heart,
-  ChevronDown,
-  ChevronUp,
-  Star,
+  Send,
+  ExternalLink,
+  RefreshCw,
+  ThumbsUp,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import ChatBot from "./ChatBot";
 import { motion, AnimatePresence } from "framer-motion";
-
-// Enhanced TypeWriter with rotating words
-const TypeWriter = ({
-  text,
-  words = [],
-}: {
-  text: string;
-  words?: string[];
-}) => {
-  const [displayText, setDisplayText] = useState("");
-  const [wordIndex, setWordIndex] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    const tick = () => {
-      const word = words.length > 0 ? words[wordIndex] : text;
-      const updateText = isDeleting
-        ? word.substring(0, displayText.length - 1)
-        : word.substring(0, displayText.length + 1);
-
-      setDisplayText(updateText);
-
-      if (!isDeleting && updateText === word) {
-        setTimeout(() => setIsDeleting(true), 2000);
-      } else if (isDeleting && updateText === "") {
-        setIsDeleting(false);
-        setWordIndex((prev) => (prev + 1) % words.length);
-      }
-    };
-
-    timer = setTimeout(tick, isDeleting ? 100 : 150);
-    return () => clearTimeout(timer);
-  }, [displayText, isDeleting, wordIndex, words, text]);
-
-  return (
-    <motion.span
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-    >
-      {displayText}
-      <motion.span
-        animate={{ opacity: [0, 1, 0] }}
-        transition={{ duration: 0.8, repeat: Infinity }}
-        className="ml-1"
-      >
-        |
-      </motion.span>
-    </motion.span>
-  );
-};
-
-// Add particle effect component
-const ParticleBackground = () => {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-20" />
-      {Array.from({ length: 50 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-green-400 rounded-full"
-          initial={{
-            x: Math.random() * 100 + "%",
-            y: Math.random() * 100 + "%",
-            scale: Math.random() * 0.5 + 0.5,
-            opacity: Math.random() * 0.5 + 0.25,
-          }}
-          animate={{
-            x: [
-              Math.random() * 100 + "%",
-              Math.random() * 100 + "%",
-              Math.random() * 100 + "%",
-            ],
-            y: [
-              Math.random() * 100 + "%",
-              Math.random() * 100 + "%",
-              Math.random() * 100 + "%",
-            ],
-            opacity: [0.25, 0.5, 0.25],
-          }}
-          transition={{
-            duration: Math.random() * 10 + 20,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
+import ChatBot from "./ChatBot";
 const Portfolio = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
-  const [scrollProgress, setScrollProgress] = useState(0);
-  const [stats, setStats] = useState({
-    projects: 0,
-    experience: 0,
-    coffee: 0,
-    commits: 0,
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    subject: "",
+    message: "",
   });
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-  const [visibleSection, setVisibleSection] = useState<string | null>(null);
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const [formStatus, setFormStatus] = useState({
+    loading: false,
+    success: false,
+    error: null as string | null,
+  });
 
-  // Section visibility animation
-  const sectionVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+  // Handle navigation click
+  const handleNavClick = (sectionId: string) => {
+    setActiveSection(sectionId);
+    setIsMenuOpen(false);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
-  // Card hover animation
-  const cardVariants = {
-    hover: { scale: 1.03, transition: { duration: 0.1 } },
-    tap: { scale: 0.95 },
-  };
-
-  // Add rotating titles for the header
-  const developerTitles = [
-    "Developer",
-    "Engineer",
-    "Innovator",
-    "Problem Solver",
-    "Tech Enthusiast",
-  ];
-
-  // Add scroll reveal animation
-  const revealVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  // Add hover effect for cards
-  const cardHoverVariants = {
-    initial: { scale: 1 },
-    hover: {
-      scale: 1.05,
-      boxShadow:
-        "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-      transition: { type: "spring", stiffness: 300 },
-    },
-  };
-
-  // Animate stats on load with improved animation
-  useEffect(() => {
-    const animateStats = () => {
-      const targetStats = {
-        projects: 15,
-        experience: 5,
-        coffee: 1482,
-        commits: 3267,
-      };
-
-      const duration = 2000;
-      const steps = 50;
-      const interval = duration / steps;
-
-      let currentStep = 0;
-
-      const timer = setInterval(() => {
-        currentStep++;
-        const progress = currentStep / steps;
-        const easeProgress = 1 - Math.pow(1 - progress, 3); // Cubic easing
-
-        setStats({
-          projects: Math.floor(targetStats.projects * easeProgress),
-          experience: Math.floor(targetStats.experience * easeProgress),
-          coffee: Math.floor(targetStats.coffee * easeProgress),
-          commits: Math.floor(targetStats.commits * easeProgress),
-        });
-
-        if (currentStep >= steps) clearInterval(timer);
-      }, interval);
-    };
-
-    animateStats();
-  }, []);
-
-  // Enhanced scroll handling with intersection observer
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisibleSection(entry.target.id);
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    document.querySelectorAll("section[id]").forEach((section) => {
-      observer.observe(section);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Enhanced scroll progress
+  // Monitor scroll position to update active nav
   useEffect(() => {
     const handleScroll = () => {
-      const winScroll = document.documentElement.scrollTop;
-      const height =
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight;
-      const scrolled = (winScroll / height) * 100;
-      setScrollProgress(scrolled);
+      const sections = document.querySelectorAll("section");
+      const scrollPosition = window.scrollY + 100;
+
+      sections.forEach((section) => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        const sectionId = section.getAttribute("id") || "";
+
+        if (
+          scrollPosition >= sectionTop &&
+          scrollPosition < sectionTop + sectionHeight
+        ) {
+          setActiveSection(sectionId);
+        }
+      });
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Theme toggle with animation
-  const toggleTheme = () => {
-    setTheme((prev) => {
-      const newTheme = prev === "light" ? "dark" : "light";
-      document.documentElement.classList.toggle("dark");
-      return newTheme;
-    });
-  };
-
-  // Add keyboard navigation
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setIsMenuOpen(false);
-      if (e.ctrlKey && e.key === "k") {
-        e.preventDefault();
-        // Open search or chat
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, []);
-
-  const projects = [
-    {
-      title: "AI-Powered Analytics Dashboard",
-      description:
-        "Real-time data visualization platform with machine learning insights",
-      tags: ["React", "Python", "TensorFlow", "AWS"],
-      image: "/projects/analytics.jpg",
-      link: "#",
-      github: "#",
-      stats: {
-        stars: 128,
-        forks: 34,
-      },
-    },
-    {
-      title: "Blockchain Trading Platform",
-      description: "Decentralized exchange with smart contract integration",
-      tags: ["Solidity", "Web3.js", "Node.js", "MongoDB"],
-      link: "#",
-      stats: {
-        stars: 89,
-        forks: 23,
-      },
-    },
-    {
-      title: "IoT Device Management System",
-      description: "Cloud-based platform for managing IoT devices at scale",
-      tags: ["React", "Node.js", "MQTT", "Azure"],
-      link: "#",
-      stats: {
-        stars: 156,
-        forks: 45,
-      },
-    },
-  ];
-
-  const skills = [
-    {
-      name: "Frontend Development",
-      items: ["React", "Vue.js", "TypeScript", "Tailwind CSS"],
-    },
-    {
-      name: "Backend Development",
-      items: ["Node.js", "Python", "Java", "PostgreSQL"],
-    },
-    { name: "DevOps & Cloud", items: ["AWS", "Docker", "Kubernetes", "CI/CD"] },
-    {
-      name: "Other Skills",
-      items: ["Machine Learning", "Blockchain", "IoT", "System Design"],
-    },
-  ];
-
-  const testimonials = [
-    {
-      name: "Sarah Johnson",
-      role: "Tech Lead at TechCorp",
-      content:
-        "One of the most talented developers I've worked with. Delivers exceptional results.",
-    },
-    {
-      name: "Mike Chen",
-      role: "CTO at StartupX",
-      content:
-        "Exceptional problem-solving skills and attention to detail. A great team player.",
-    },
-  ];
-
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "dark" : ""}`}>
-      {/* Animated Progress Bar */}
-      <motion.div
-        className="fixed top-0 left-0 h-1 bg-gradient-to-r from-green-400 via-blue-500 to-purple-600 z-50"
-        initial={{ width: "0%" }}
-        animate={{ width: `${scrollProgress}%` }}
-        transition={{ duration: 0.2 }}
-      />
-
-      {/* Enhanced Navigation */}
-      <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 100 }}
-        className="bg-gray-900/90 backdrop-blur-md dark:bg-gray-800/90 text-white p-4 fixed w-full z-40 shadow-lg"
-      >
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <motion.a
-            href="#"
-            className="text-xl font-bold flex items-center"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Terminal className="mr-2 text-green-400" />
-            <span className="bg-gradient-to-r from-blue-400 to-green-400 text-transparent bg-clip-text">
-              Gloire <TypeWriter words={developerTitles} text="Developer" />
+    <div className="bg-[#081b29] text-white min-h-screen overflow-x-hidden">
+      {/* Navigation */}
+      <header className="fixed top-0 w-full z-50 bg-[#081b29]/90 backdrop-blur-md border-b border-[#00abf0]/20">
+        <div className="container mx-auto flex justify-between items-center py-3 px-6">
+          <div className="text-2xl font-bold flex items-center gap-2">
+            <span className="text-[#00abf0]">Gloire</span>
+            <span className="text-xs bg-[#00abf0]/10 px-2 py-0.5 rounded-full text-[#00abf0]">
+              Developer
             </span>
-          </motion.a>
+          </div>
 
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex space-x-6">
+            {["home", "about", "education", "skills", "contact"].map((item) => (
+              <button
+                key={item}
+                onClick={() => handleNavClick(item)}
+                className={`capitalize text-sm ${
+                  activeSection === item
+                    ? "text-[#00abf0] font-medium"
+                    : "text-gray-300 hover:text-white"
+                } transition-colors relative after:content-[''] after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:bg-[#00abf0] after:transition-all ${
+                  activeSection === item ? "after:w-full" : "after:w-0"
+                } hover:after:w-full`}
+              >
+                {item}
+              </button>
+            ))}
+          </nav>
+
+          {/* Mobile Menu Button */}
           <button
-            className="lg:hidden hover:text-green-400 transition-colors"
+            className="md:hidden text-gray-300 hover:text-white"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-
-          <div className="hidden lg:flex space-x-8">
-            {["home", "about", "projects", "skills", "contact"].map(
-              (section) => (
-                <a
-                  key={section}
-                  href={`#${section}`}
-                  className={`hover:text-green-400 transition-colors capitalize ${
-                    activeSection === section
-                      ? "text-green-400 border-b-2 border-green-400"
-                      : ""
-                  }`}
-                >
-                  {section}
-                </a>
-              )
-            )}
-          </div>
-
-          {/* Add theme toggle and keyboard shortcuts */}
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full hover:bg-gray-700 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "light" ? "🌙" : "☀️"}
-            </button>
-            <span className="text-sm text-gray-400">
-              Press Ctrl + K to search
-            </span>
-          </div>
         </div>
 
-        {isMenuOpen && (
-          <div className="lg:hidden mt-4 space-y-4 text-center animate-fadeIn">
-            {["home", "about", "projects", "skills", "contact"].map(
-              (section) => (
-                <a
-                  key={section}
-                  href={`#${section}`}
-                  className={`block py-2 hover:text-green-400 transition-colors capitalize ${
-                    activeSection === section ? "text-green-400" : ""
-                  }`}
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {section}
-                </a>
-              )
-            )}
-          </div>
-        )}
-      </motion.nav>
+        {/* Mobile Navigation */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-[#081b29]/95 backdrop-blur-md border-b border-[#00abf0]/20"
+            >
+              <div className="container mx-auto py-2 px-6 flex flex-col">
+                {["home", "about", "education", "skills", "contact"].map(
+                  (item) => (
+                    <button
+                      key={item}
+                      onClick={() => handleNavClick(item)}
+                      className={`capitalize py-2 text-sm ${
+                        activeSection === item
+                          ? "text-[#00abf0] font-medium"
+                          : "text-gray-300 hover:text-white"
+                      } transition-colors text-left`}
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
 
-      {/* Hero Section with Enhanced Parallax and Particles */}
-      <motion.section
+      {/* Hero Section */}
+      <section
         id="home"
-        initial="hidden"
-        animate={visibleSection === "home" ? "visible" : "hidden"}
-        variants={sectionVariants}
-        className="relative pt-24 pb-12 px-4 bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white min-h-screen flex items-center overflow-hidden"
+        className="min-h-screen flex items-center pt-16 pb-10 relative overflow-hidden"
       >
-        <ParticleBackground />
+        {/* Enhanced Background Effects */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#00abf0]/5 via-transparent to-transparent z-0"></div>
+        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-5 z-0"></div>
 
-        <div className="max-w-6xl mx-auto text-center relative z-10">
+        {/* Animated particles */}
+        <div className="absolute inset-0 z-0">
+          {Array.from({ length: 20 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-[#00abf0] rounded-full"
+              initial={{
+                x: Math.random() * 100 + "%",
+                y: Math.random() * 100 + "%",
+                opacity: Math.random() * 0.5 + 0.3,
+              }}
+              animate={{
+                x: [
+                  Math.random() * 100 + "%",
+                  Math.random() * 100 + "%",
+                  Math.random() * 100 + "%",
+                ],
+                y: [
+                  Math.random() * 100 + "%",
+                  Math.random() * 100 + "%",
+                  Math.random() * 100 + "%",
+                ],
+              }}
+              transition={{
+                duration: Math.random() * 20 + 10,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Floating tech icons */}
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          {[
+            { icon: "/icons/react.svg", top: "15%", left: "10%", size: 30 },
+            { icon: "/icons/node.svg", top: "25%", left: "85%", size: 24 },
+            {
+              icon: "/icons/typescript.svg",
+              top: "65%",
+              left: "15%",
+              size: 28,
+            },
+            { icon: "/icons/ai.svg", top: "75%", left: "80%", size: 32 },
+            { icon: "/icons/nextjs.svg", top: "35%", left: "75%", size: 26 },
+          ].map((tech, index) => (
+            <motion.div
+              key={index}
+              className="absolute opacity-20"
+              style={{
+                top: tech.top,
+                left: tech.left,
+                width: tech.size,
+                height: tech.size,
+              }}
+              animate={{
+                y: [0, -10, 0, 10, 0],
+                rotate: [0, 10, 0, -10, 0],
+              }}
+              transition={{
+                duration: 5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: index * 0.2,
+              }}
+            >
+              <Image
+                src={tech.icon}
+                alt="Tech Icon"
+                width={tech.size}
+                height={tech.size}
+                className="opacity-70"
+              />
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="container mx-auto px-6 z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
+          <div className="w-full md:w-1/2 space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <div className="inline-block bg-[#00abf0]/10 px-3 py-1 rounded-full mb-2">
+                <span className="text-[#00abf0] font-medium text-sm">
+                  3+ Years of Experience
+                </span>
+              </div>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
+            >
+              Hi, I'm <span className="text-[#00abf0]">Gloire</span>
+            </motion.h1>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="space-y-3"
+            >
+              <h2 className="text-xl md:text-2xl font-medium text-gray-300">
+                <span className="text-[#00abf0]">Full Stack Developer</span> &{" "}
+                <span className="text-[#00abf0]">AI Engineer</span>
+              </h2>
+              <p className="text-gray-400 max-w-lg text-sm md:text-base">
+                I specialize in building modern web applications and AI
+                integrations with a focus on performance, scalability, and
+                exceptional user experiences.
+              </p>
+            </motion.div>
+
+            {/* Tech Stack */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-wrap gap-2 pt-2"
+            >
+              {[
+                { name: "React", icon: "/icons/react.svg" },
+                { name: "Next.js", icon: "/icons/nextjs.svg" },
+                { name: "Node.js", icon: "/icons/node.svg" },
+                { name: "TypeScript", icon: "/icons/typescript.svg" },
+                { name: "AI", icon: "/icons/ai.svg" },
+                { name: "MongoDB", icon: "" },
+              ].map((tech, index) => (
+                <span
+                  key={index}
+                  className="bg-[#0a1f32] text-xs px-3 py-1 rounded-full border border-[#00abf0]/20 text-gray-300 flex items-center gap-1.5 hover:border-[#00abf0]/50 transition-colors"
+                >
+                  {tech.icon && (
+                    <Image
+                      src={tech.icon}
+                      alt={tech.name}
+                      width={12}
+                      height={12}
+                      className="opacity-80"
+                    />
+                  )}
+                  {tech.name}
+                </span>
+              ))}
+            </motion.div>
+
+            {/* Action Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="flex flex-wrap gap-3 pt-2"
+            >
+              <button className="bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-5 py-2 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#00abf0]/20 hover:scale-105">
+                Hire Me
+              </button>
+              <button className="border border-[#00abf0] text-[#00abf0] px-5 py-2 rounded-full text-sm font-medium transition-all hover:bg-[#00abf0]/10">
+                Let's Talk
+              </button>
+            </motion.div>
+
+            {/* Social Links */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="flex space-x-3 pt-4"
+            >
+              {[
+                { icon: Github, link: "https://github.com/gloirembonyi" },
+                { icon: Linkedin, link: "https://www.linkedin.com/in/gloire-mbonyi-755788250/" },
+                { icon: Mail, link: "mailto:gloirembonyi4@gmail.com" },
+              ].map((social, index) => (
+                <a
+                  key={index}
+                  href={social.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-[#0a1f32] p-2 rounded-full hover:bg-[#00abf0]/10 transition-all group"
+                >
+                  <social.icon
+                    size={18}
+                    className="text-gray-400 group-hover:text-[#00abf0]"
+                  />
+                </a>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Profile Image */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="w-full md:w-1/2 flex justify-center"
+          >
+            <div className="relative">
+              {/* Decorative elements */}
+              <motion.div
+                className="absolute -top-4 -left-4 w-20 h-20 border-t-2 border-l-2 border-[#00abf0]/30"
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              <motion.div
+                className="absolute -bottom-4 -right-4 w-20 h-20 border-b-2 border-r-2 border-[#00abf0]/30"
+                animate={{ opacity: [0.3, 0.6, 0.3] }}
+                transition={{ duration: 2, repeat: Infinity, delay: 1 }}
+              />
+
+              <div className="relative w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 overflow-hidden rounded-full border-4 border-[#00abf0] p-2">
+                {/* Blue stripes overlay effect */}
+                <div className="absolute inset-0 rounded-full overflow-hidden">
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/40 transform -translate-x-4"></div>
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/40 transform translate-x-2"></div>
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/40 transform translate-x-6"></div>
+                </div>
+
+                {/* Profile image */}
+                <div className="rounded-full overflow-hidden w-full h-full relative z-10">
+                  <Image
+                    src="/gloire.mg.png"
+                    alt="Gloire"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </div>
+
+              {/* Experience badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.5 }}
+                className="absolute -bottom-2 -right-2 bg-[#081b29] border border-[#00abf0] rounded-lg py-1.5 px-3 shadow-lg"
+              >
+                <p className="text-xs text-gray-400">Full Stack & AI</p>
+                <p className="text-sm font-bold text-[#00abf0]">Developer</p>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="py-16 relative">
+        {/* Decorative background elements */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-[#00abf0]/5 rounded-full filter blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#00abf0]/5 rounded-full filter blur-3xl"></div>
+
+        <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="mb-12 text-center"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Full Stack Developer
-              <motion.span
-                className="block mt-2 bg-gradient-to-r from-blue-400 via-green-400 to-purple-400 text-transparent bg-clip-text"
-                animate={{
-                  backgroundPosition: ["0%", "100%"],
-                }}
-                transition={{
-                  duration: 5,
-                  repeat: Infinity,
-                  repeatType: "reverse",
-                }}
-              >
-                Crafting Digital Excellence
-              </motion.span>
-            </h1>
+            <h2 className="text-3xl font-bold">
+              About <span className="text-[#00abf0]">Me</span>
+            </h2>
+            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
+          </motion.div>
 
-            {/* Enhanced Stats Cards with 3D effect */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="flex flex-col md:flex-row gap-10 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="w-full md:w-2/5"
+            >
+              <div className="relative">
+                {/* Main image with border effect */}
+                <div className="relative overflow-hidden rounded-xl border-2 border-[#00abf0] shadow-lg shadow-[#00abf0]/10">
+                  <div className="aspect-w-4 aspect-h-5 relative">
+                    <Image
+                      src="/gloire.mg.png"
+                      alt="Gloire"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  {/* Glowing border effect */}
+                  <div className="absolute inset-0 border-2 border-[#00abf0] opacity-10 rounded-xl"></div>
+                </div>
+
+                {/* Decorative elements */}
+                <div className="absolute -bottom-3 -right-3 w-20 h-20 border border-[#00abf0] rounded-lg z-[-1]"></div>
+                <div className="absolute -top-3 -left-3 w-20 h-20 border border-[#00abf0] rounded-lg z-[-1]"></div>
+
+                {/* Experience badge */}
+                <div className="absolute -bottom-4 -right-4 bg-[#081b29] border border-[#00abf0] rounded-lg py-1.5 px-3 shadow-lg">
+                  <p className="text-xs text-gray-400">Experience</p>
+                  <p className="text-sm font-bold text-[#00abf0]">5+ Years</p>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="w-full md:w-3/5"
+            >
+              <div className="bg-[#0a1f32]/50 p-6 rounded-xl border border-[#00abf0]/10 backdrop-blur-sm">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Code size={20} className="text-[#00abf0]" />
+                  <span className="text-[#00abf0]">Full Stack</span> Developer &
+                  AI Engineer
+                </h3>
+
+                <div className="space-y-4 text-sm">
+                  <p className="text-gray-300 leading-relaxed">
+                    I am a passionate Full Stack Developer and AI Engineer with
+                    expertise in creating visually appealing and user-friendly
+                    web applications. With a strong foundation in modern web
+                    technologies and AI integration, I strive to build
+                    responsive, intelligent, and accessible interfaces that
+                    provide exceptional user experiences.
+                  </p>
+
+                  <p className="text-gray-300 leading-relaxed">
+                    My approach combines creative design thinking with technical
+                    excellence to deliver solutions that not only meet but
+                    exceed client expectations. I enjoy staying updated with the
+                    latest industry trends and continuously expanding my skill
+                    set to tackle new challenges in web development and
+                    artificial intelligence.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                  {[
+                    { icon: User, label: "Name", value: "Gloire Mugisho" },
+                    { icon: Mail, label: "Email", value: "info@example.com" },
+                    {
+                      icon: Briefcase,
+                      label: "Current Position",
+                      value: "Developer at GKK",
+                    },
+                    { icon: Code, label: "Projects", value: "15+ Completed" },
+                  ].map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3 bg-[#081b29]/70 p-3 rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/40 transition-all group"
+                    >
+                      <item.icon
+                        size={16}
+                        className="text-[#00abf0] group-hover:scale-110 transition-transform"
+                      />
+                      <div>
+                        <p className="text-xs text-gray-400">{item.label}</p>
+                        <p className="text-sm font-medium">{item.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <button className="mt-6 bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-5 py-2 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#00abf0]/20 hover:scale-105 flex items-center gap-2">
+                  <span>Download CV</span>
+                  <ExternalLink size={14} />
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Education & Experience Section */}
+      <section id="education" className="py-16 bg-[#041320] relative">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="mb-12 text-center"
+          >
+            <h2 className="text-3xl font-bold">
+              My <span className="text-[#00abf0]">Journey</span>
+            </h2>
+            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Education Column */}
+            <div>
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                <BookOpen size={18} className="text-[#00abf0]" />
+                Education
+              </h3>
+
+              <div className="space-y-6 relative">
+                {/* Timeline line */}
+                <div className="absolute left-2.5 top-1 bottom-0 w-0.5 bg-[#00abf0]/20"></div>
+
+                {/* Timeline items */}
+                {[1, 2, 3].map((item) => (
+                  <motion.div
+                    key={`education-${item}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: item * 0.1 }}
+                    className="relative pl-8"
+                  >
+                    {/* Timeline dot */}
+                    <div className="absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 border-[#00abf0] bg-[#081b29]"></div>
+
+                    <div className="bg-[#072136] p-4 rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/50 transition-all group">
+                      <div className="text-[#00abf0] text-xs font-medium mb-1">
+                        2021 - Present
+                      </div>
+                      <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
+                        Computer Science - University
+                      </h4>
+                      <p className="text-xs text-gray-400">
+                        Studying advanced programming concepts, algorithms, and
+                        artificial intelligence with a focus on practical
+                        applications.
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Experience Column */}
+            <div>
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                <Briefcase size={18} className="text-[#00abf0]" />
+                Experience
+              </h3>
+
+              <div className="space-y-6 relative">
+                {/* Timeline line */}
+                <div className="absolute left-2.5 top-1 bottom-0 w-0.5 bg-[#00abf0]/20"></div>
+
+                {/* Timeline items */}
+                {[1, 2, 3].map((item) => (
+                  <motion.div
+                    key={`experience-${item}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: item * 0.1 }}
+                    className="relative pl-8"
+                  >
+                    {/* Timeline dot */}
+                    <div className="absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 border-[#00abf0] bg-[#081b29]"></div>
+
+                    <div className="bg-[#072136] p-4 rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/50 transition-all group">
+                      <div className="text-[#00abf0] text-xs font-medium mb-1">
+                        2020 - Present
+                      </div>
+                      <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
+                        Developer - GKK (Global Kwik Koders)
+                      </h4>
+                      <p className="text-xs text-gray-400">
+                        Working on full stack web applications and AI
+                        integrations, developing solutions for clients across
+                        various industries.
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Skills Section */}
+      <section id="skills" className="py-16 relative">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="mb-12 text-center"
+          >
+            <h2 className="text-3xl font-bold">
+              My <span className="text-[#00abf0]">Skills</span>
+            </h2>
+            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                <Code size={18} className="text-[#00abf0]" />
+                Coding Skills
+              </h3>
+
+              {/* Skill bars */}
               {[
-                { icon: Briefcase, label: "Projects", value: stats.projects },
-                { icon: Clock, label: "Years", value: stats.experience },
-                { icon: Coffee, label: "Coffees", value: stats.coffee },
-                { icon: Code, label: "Commits", value: stats.commits },
-              ].map((stat, index) => (
+                { name: "HTML/CSS", percentage: 90, icon: "" },
+                {
+                  name: "JavaScript/TypeScript",
+                  percentage: 85,
+                  icon: "/icons/typescript.svg",
+                },
+                {
+                  name: "React/Next.js",
+                  percentage: 88,
+                  icon: "/icons/react.svg",
+                },
+                {
+                  name: "Node.js/Express",
+                  percentage: 82,
+                  icon: "/icons/node.svg",
+                },
+              ].map((skill, index) => (
                 <motion.div
-                  key={index}
-                  whileHover={{
-                    scale: 1.05,
-                    rotateY: 10,
-                    rotateX: 10,
-                    z: 50,
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  className="transform perspective-1000"
+                  key={skill.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="mb-4"
                 >
-                  <Card className="bg-gray-800/50 backdrop-blur-md border-none hover:bg-gray-700/50 transition-all duration-300 transform-gpu">
-                    <CardContent className="p-4 text-center">
-                      <motion.div
-                        whileHover={{ rotate: 360 }}
-                        transition={{ duration: 0.5 }}
-                      >
-                        <stat.icon className="w-8 h-8 text-green-400 mx-auto mb-2" />
-                      </motion.div>
-                      <motion.h3
-                        className="text-2xl font-bold text-white"
-                        initial={{ opacity: 0, scale: 0 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.2 }}
-                      >
-                        {stat.value}+
-                      </motion.h3>
-                      <p className="text-gray-400">{stat.label}</p>
-                    </CardContent>
-                  </Card>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium flex items-center gap-2">
+                      {skill.icon && (
+                        <Image
+                          src={skill.icon}
+                          alt={skill.name}
+                          width={14}
+                          height={14}
+                          className="opacity-80"
+                        />
+                      )}
+                      {skill.name}
+                    </span>
+                    <span className="text-xs text-[#00abf0]">
+                      {skill.percentage}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-[#072136] rounded-full h-1.5">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${skill.percentage}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: 0.3 }}
+                      className="h-1.5 rounded-full bg-gradient-to-r from-[#00abf0] to-[#0077b6]"
+                    ></motion.div>
+                  </div>
                 </motion.div>
               ))}
             </div>
 
-            {/* Enhanced Social Links with tooltips */}
-            <motion.div
-              className="flex justify-center space-x-6"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-            >
+            <div>
+              <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                <Briefcase size={18} className="text-[#00abf0]" />
+                Professional Skills
+              </h3>
+
+              {/* Skill bars */}
               {[
-                { icon: Github, link: "#", label: "GitHub" },
-                { icon: Linkedin, link: "#", label: "LinkedIn" },
-                { icon: Mail, link: "#", label: "Email" },
-              ].map((social, index) => (
-                <motion.a
-                  key={index}
-                  href={social.link}
-                  whileHover={{
-                    scale: 1.2,
-                    rotate: 5,
-                    color: "#4ade80",
-                  }}
-                  whileTap={{ scale: 0.9 }}
-                  className="text-gray-400 hover:text-green-400 transition-all relative group"
+                {
+                  name: "AI Integration",
+                  percentage: 85,
+                  icon: "/icons/ai.svg",
+                },
+                { name: "Full Stack Development", percentage: 90, icon: "" },
+                { name: "UI/UX Design", percentage: 80, icon: "" },
+                { name: "DevOps/Deployment", percentage: 75, icon: "" },
+              ].map((skill, index) => (
+                <motion.div
+                  key={skill.name}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="mb-4"
                 >
-                  <social.icon size={24} />
-                  <motion.span
-                    className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-2 py-1 rounded text-sm opacity-0 group-hover:opacity-100"
-                    initial={{ y: 10 }}
-                    animate={{ y: 0 }}
-                  >
-                    {social.label}
-                  </motion.span>
-                </motion.a>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-sm font-medium flex items-center gap-2">
+                      {skill.icon && (
+                        <Image
+                          src={skill.icon}
+                          alt={skill.name}
+                          width={14}
+                          height={14}
+                          className="opacity-80"
+                        />
+                      )}
+                      {skill.name}
+                    </span>
+                    <span className="text-xs text-[#00abf0]">
+                      {skill.percentage}%
+                    </span>
+                  </div>
+                  <div className="w-full bg-[#072136] rounded-full h-1.5">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      whileInView={{ width: `${skill.percentage}%` }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1, delay: 0.3 }}
+                      className="h-1.5 rounded-full bg-gradient-to-r from-[#00abf0] to-[#0077b6]"
+                    ></motion.div>
+                  </div>
+                </motion.div>
               ))}
-            </motion.div>
-          </motion.div>
-        </div>
-
-        {/* Enhanced Scroll Indicator */}
-        <motion.div
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
-          animate={{
-            y: [0, 10, 0],
-            opacity: [0.5, 1, 0.5],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            repeatType: "reverse",
-          }}
-        >
-          <ChevronDown className="w-6 h-6 text-gray-400" />
-        </motion.div>
-      </motion.section>
-
-      {/* About Section */}
-      <section id="about" className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            About Me
-          </h2>
-          <Card className="bg-white shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardContent className="p-8">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div>
-                  <h3 className="text-2xl font-bold mb-4 text-gray-800">
-                    Who am I?
-                  </h3>
-                  <p className="text-gray-700 leading-relaxed mb-4">
-                    A passionate full-stack developer with expertise in building
-                    scalable web applications and solving complex problems. I
-                    specialize in modern JavaScript frameworks, cloud
-                    technologies, and creating exceptional user experiences.
-                  </p>
-                  <p className="text-gray-700 leading-relaxed">
-                    When I'm not coding, you'll find me contributing to
-                    open-source projects, writing technical articles, and
-                    mentoring aspiring developers.
-                  </p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { icon: Code, label: "Clean Code" },
-                    { icon: BookOpen, label: "Continuous Learning" },
-                    { icon: Award, label: "Best Practices" },
-                    { icon: Heart, label: "Passionate" },
-                  ].map((item, index) => (
-                    <Card
-                      key={index}
-                      className="bg-gray-50 hover:bg-green-50 transition-colors"
-                    >
-                      <CardContent className="p-4 text-center">
-                        <item.icon className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                        <p className="font-medium text-gray-800">
-                          {item.label}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
-      {/* Projects Section */}
-      <motion.section
-        id="projects"
-        initial="hidden"
-        animate={visibleSection === "projects" ? "visible" : "hidden"}
-        variants={sectionVariants}
-        className="py-16 px-4 bg-gray-50 dark:bg-gray-900"
-      >
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Featured Projects
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {projects.map((project, index) => (
-              <Card
-                key={index}
-                className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2"
-              >
-                <CardHeader>
-                  <CardTitle className="text-xl font-bold flex items-center justify-between">
-                    {project.title}
-                    <a
-                      href={project.link}
-                      className="text-green-600 hover:text-green-800"
-                    >
-                      <ExternalLink size={20} />
-                    </a>
-                  </CardTitle>
-                  <CardDescription>{project.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.tags.map((tag, tagIndex) => (
-                      <span
-                        key={tagIndex}
-                        className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>⭐ {project.stats.stars} stars</span>
-                    <span>🔄 {project.stats.forks} forks</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </motion.section>
-
-      {/* Skills Section */}
-      <section id="skills" className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Skills & Expertise
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {skills.map((category, index) => (
-              <Card
-                key={index}
-                className="bg-white shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <CardHeader>
-                  <CardTitle className="text-lg font-bold text-gray-800">
-                    {category.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {category.items.map((skill, skillIndex) => (
-                      <div
-                        key={skillIndex}
-                        className="bg-gray-50 p-2 rounded-lg hover:bg-green-50 transition-colors"
-                      >
-                        {skill}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-16 px-4 bg-gray-50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-            Testimonials
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card
-                key={index}
-                className="bg-white shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <CardContent className="p-6">
-                  <div className="text-gray-700 italic mb-4">
-                    "{testimonial.content}"
-                  </div>
-                  <div className="flex items-center">
-                    <User className="w-10 h-10 text-green-500 mr-3" />
-                    <div>
-                      <div className="font-bold text-gray-900">
-                        {testimonial.name}
-                      </div>
-                      <div className="text-gray-600 text-sm">
-                        {testimonial.role}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 px-4 bg-gray-900 text-white">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center">
-            Let's Work Together
-          </h2>
-          <Card className="bg-gray-800 border-none max-w-2xl mx-auto">
-            <CardContent className="p-8">
-              <div className="grid gap-6">
-                <div className="flex items-center space-x-4">
-                  <Mail className="w-6 h-6 text-green-400" />
-                  <div>
-                    <h3 className="font-bold">Email</h3>
-                    <a
-                      href="mailto:contact@example.com"
-                      className="text-gray-300 hover:text-green-400 transition-colors"
-                    >
-                      contact@example.com
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Linkedin className="w-6 h-6 text-green-400" />
-                  <div>
-                    <h3 className="font-bold">LinkedIn</h3>
-                    <a
-                      href="#"
-                      className="text-gray-300 hover:text-green-400 transition-colors"
-                    >
-                      /in/johndeveloper
-                    </a>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <Github className="w-6 h-6 text-green-400" />
-                  <div>
-                    <h3 className="font-bold">GitHub</h3>
-                    <a
-                      href="#"
-                      className="text-gray-300 hover:text-green-400 transition-colors"
-                    >
-                      @johndeveloper
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div className="mt-8 text-center">
-                <a
-                  href="mailto:contact@example.com"
-                  className="inline-flex items-center bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors"
+      <section id="contact" className="py-16 bg-[#041320] relative">
+        <div className="container mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="mb-12 text-center"
+          >
+            <h2 className="text-3xl font-bold">
+              Contact <span className="text-[#00abf0]">Me!</span>
+            </h2>
+            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
+          </motion.div>
+
+          <div className="max-w-4xl mx-auto">
+            <form
+              className="space-y-4"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setFormStatus({ ...formStatus, loading: true, error: null });
+
+                try {
+                  const response = await fetch("/api/contact", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                  });
+
+                  const data = await response.json();
+
+                  if (!response.ok) {
+                    throw new Error(data.error || "Failed to send message");
+                  }
+
+                  setFormStatus({ loading: false, success: true, error: null });
+                  setFormData({
+                    name: "",
+                    email: "",
+                    phone: "",
+                    subject: "",
+                    message: "",
+                  });
+
+                  // Reset success message after 5 seconds
+                  setTimeout(() => {
+                    setFormStatus((prev) => ({ ...prev, success: false }));
+                  }, 5000);
+                } catch (error) {
+                  setFormStatus({
+                    loading: false,
+                    success: false,
+                    error:
+                      error instanceof Error
+                        ? error.message
+                        : "Failed to send message",
+                  });
+                }
+              }}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
                 >
-                  Get In Touch <Mail size={20} className="ml-2" />
-                </a>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors"
+                  />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
+                >
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors"
+                  />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <input
+                    type="tel"
+                    placeholder="Mobile Number"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    required
+                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors"
+                  />
+                </motion.div>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Email Subject"
+                    value={formData.subject}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
+                    required
+                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors"
+                  />
+                </motion.div>
               </div>
-            </CardContent>
-          </Card>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+              >
+                <textarea
+                  rows={4}
+                  placeholder="Your Message"
+                  value={formData.message}
+                  onChange={(e) =>
+                    setFormData({ ...formData, message: e.target.value })
+                  }
+                  required
+                  className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors resize-none"
+                ></textarea>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+                className="flex flex-col items-center gap-3"
+              >
+                <button
+                  type="submit"
+                  disabled={formStatus.loading}
+                  className="bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-6 py-2.5 rounded-full text-sm font-medium transition-all flex items-center gap-2 disabled:opacity-50 hover:shadow-lg hover:shadow-[#00abf0]/20 hover:scale-105"
+                >
+                  {formStatus.loading ? (
+                    <>
+                      <RefreshCw className="animate-spin" size={14} />
+                      Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send size={14} />
+                      Submit
+                    </>
+                  )}
+                </button>
+
+                {/* Success/Error Messages */}
+                <AnimatePresence>
+                  {formStatus.success && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-green-400 flex items-center gap-2 text-sm"
+                    >
+                      <ThumbsUp size={14} />
+                      Message sent successfully!
+                    </motion.div>
+                  )}
+                  {formStatus.error && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="text-red-400 flex items-center gap-2 text-sm"
+                    >
+                      <X size={14} />
+                      {formStatus.error}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </form>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-8 px-4 border-t border-gray-800">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 text-center md:text-left">
-            <div>
-              <h3 className="font-bold text-white mb-4">Quick Links</h3>
-              <div className="space-y-2">
-                <a
-                  href="#about"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  About
-                </a>
-                <a
-                  href="#projects"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  Projects
-                </a>
-                <a
-                  href="#skills"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  Skills
-                </a>
-                <a
-                  href="#contact"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  Contact
-                </a>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-bold text-white mb-4">Connect</h3>
-              <div className="space-y-2">
-                <a
-                  href="#"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  GitHub
-                </a>
-                <a
-                  href="#"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  LinkedIn
-                </a>
-                <a
-                  href="#"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  Twitter
-                </a>
-                <a
-                  href="#"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  Blog
-                </a>
-              </div>
-            </div>
-            <div>
-              <h3 className="font-bold text-white mb-4">Latest Articles</h3>
-              <div className="space-y-2">
-                <a
-                  href="#"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  Modern Web Development
-                </a>
-                <a
-                  href="#"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  Cloud Architecture
-                </a>
-                <a
-                  href="#"
-                  className="block hover:text-green-400 transition-colors"
-                >
-                  DevOps Best Practices
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center">
-            <p>
-              © {new Date().getFullYear()} John Developer. Built with React &
-              Tailwind CSS.
-            </p>
-          </div>
+      <footer className="bg-[#081b29] py-6 border-t border-[#00abf0]/20">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-gray-400 text-sm">
+            © {new Date().getFullYear()} by Gloire | All Rights Reserved
+          </p>
         </div>
       </footer>
 
-      {/* ChatBot */}
-      <ChatBot />
-
-      {/* Enhanced Scroll to Top Button */}
-      <AnimatePresence>
-        {scrollProgress > 20 && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="fixed bottom-20 right-4 p-3 bg-gradient-to-r from-green-400 to-blue-500 text-white rounded-full shadow-lg"
+      {/* Floating Action Buttons */}
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          className="bg-[#00abf0] hover:bg-[#0096c7] text-white p-2.5 rounded-full shadow-lg transition-all hover:shadow-[#00abf0]/20 hover:scale-110"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            <ChevronUp className="w-6 h-6" />
-          </motion.button>
-        )}
-      </AnimatePresence>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 15l7-7 7 7"
+            />
+          </svg>
+        </button>
+        <ChatBot />
+      </div>
     </div>
   );
 };

@@ -1,21 +1,46 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   MessageCircle,
   Send,
   X,
-  User,
-  ExternalLink,
-  Sparkles,
-  RefreshCw,
-  ThumbsUp,
   Bot,
   Zap,
-  Brain,
   Code,
+  Mail,
+  RefreshCw,
+  ThumbsUp,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
-import * as Dropdown from "@radix-ui/react-dropdown-menu";
 import { motion, AnimatePresence } from "framer-motion";
+import { profileData } from "../data/profile";
+
+/**
+ * ChatBot Component for Portfolio
+ *
+ * This component creates an AI-powered chatbot that can answer questions about the portfolio owner.
+ * It uses Google's Gemini API to generate responses based on predefined knowledge.
+ *
+ * HOW TO TRAIN THE CHATBOT WITH YOUR OWN DATA:
+ *
+ * 1. Update the profile data in src/data/profile.ts with your own information:
+ *    - Modify skills, projects, experience, and contact details
+ *    - This serves as the knowledge base for the chatbot
+ *
+ * 2. For more advanced training:
+ *    - Modify the contextPrompt in the generateResponse function
+ *    - Add more specific details about yourself and your work
+ *
+ * 3. For full model fine-tuning:
+ *    - Create a comprehensive dataset (500+ examples recommended)
+ *    - Use a service like OpenAI's fine-tuning API
+ *    - Replace the Gemini API implementation with your custom model
+ *
+ * 4. To improve contact handling:
+ *    - Update the contactKeywords array with relevant terms
+ *    - Customize the contact response template
+ */
 
 // Define message types
 type MessageRole = "user" | "assistant";
@@ -30,6 +55,13 @@ interface Message {
 interface Suggestion {
   id: string;
   text: string;
+}
+
+interface SuggestionCategory {
+  id: string;
+  icon: any;
+  title: string;
+  suggestions: Array<{ id: string; text: string }>;
 }
 
 const TypeWriter = ({
@@ -84,7 +116,7 @@ const ChatBot = () => {
   ];
 
   // Enhanced suggestions with categories
-  const suggestionCategories = [
+  const suggestionCategories: SuggestionCategory[] = [
     {
       id: "technical",
       icon: Code,
@@ -92,7 +124,7 @@ const ChatBot = () => {
       suggestions: [
         { id: "skills", text: "What are your main technical skills?" },
         { id: "stack", text: "What's your preferred tech stack?" },
-        { id: "backend", text: "Tell me about your backend experience" },
+        { id: "ai", text: "Tell me about your AI experience" },
       ],
     },
     {
@@ -106,78 +138,22 @@ const ChatBot = () => {
           text: "Tell me about your most impressive project",
         },
         {
-          id: "challenges",
-          text: "What technical challenges have you solved?",
+          id: "ai_projects",
+          text: "What AI projects have you worked on?",
         },
       ],
     },
     {
-      id: "experience",
-      icon: Brain,
-      title: "Experience",
+      id: "contact",
+      icon: Mail,
+      title: "Contact",
       suggestions: [
-        { id: "experience", text: "What's your development experience?" },
-        { id: "role", text: "What's your current role?" },
-        { id: "achievements", text: "What are your key achievements?" },
+        { id: "email", text: "How can I email you?" },
+        { id: "phone", text: "What's your phone number?" },
+        { id: "availability", text: "When are you available for work?" },
       ],
     },
   ];
-
-  // Predefined knowledge about Gloire
-  const aboutGloire = {
-    intro:
-      "I'm Gloire's AI assistant. I can tell you about Gloire's skills, projects, experience, and more.",
-    skills: [
-      "Frontend: React, Next.js, TypeScript, CSS/SCSS, Tailwind CSS",
-      "Backend: Node.js, Express, MongoDB, SQL databases",
-      "Tools: Git, Docker, AWS, Vercel, Figma",
-      // Add your actual skills here
-    ],
-    projects: [
-      {
-        name: "Personal Portfolio",
-        description:
-          "The website you're currently visiting, built with Next.js and Tailwind CSS",
-        link: "#", // Replace with actual link
-      },
-      {
-        name: "AI Assistant",
-        description:
-          "This interactive chatbot that helps visitors learn about Gloire",
-        link: "#",
-      },
-      // Add your actual projects here
-    ],
-    experience: [
-      {
-        title: "Software Developer",
-        company: "Example Company",
-        period: "2022-Present",
-        description: "Developing web applications using React and Node.js",
-      },
-      {
-        title: "Frontend Developer",
-        company: "Another Company",
-        period: "2020-2022",
-        description:
-          "Built responsive UIs with React and implemented new features",
-      },
-      // Add your actual experience here
-    ],
-    education: [
-      {
-        degree: "Bachelor of Science in Computer Science",
-        institution: "Example University",
-        year: "2020",
-      },
-      // Add your actual education here
-    ],
-    contact: {
-      email: "gloire@example.com", // Replace with your actual email
-      linkedin: "linkedin.com/in/gloire", // Replace with your actual LinkedIn
-      github: "github.com/gloire", // Replace with your actual GitHub
-    },
-  };
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -202,29 +178,106 @@ const ChatBot = () => {
     }
   }, [isOpen, messages.length]);
 
-  // API integration for chat responses
+  // API integration for chat responses using Gemini API
   const generateResponse = async (query: string): Promise<string> => {
     try {
-      const response: Response = await fetch(
-        `https://actual-gemini-api-endpoint`,
+      // Check if it's a contact request
+      const contactKeywords = [
+        "contact",
+        "email",
+        "phone",
+        "reach",
+        "message",
+        "call",
+        "connect",
+      ];
+      const isContactRequest = contactKeywords.some((keyword) =>
+        query.toLowerCase().includes(keyword)
+      );
+
+      if (isContactRequest) {
+        return `You can contact Gloire via:
+        
+📧 Email: ${profileData.contact.email}
+📱 Phone: ${profileData.contact.phone}
+🔗 LinkedIn: ${profileData.contact.linkedin}
+🔗 GitHub: ${profileData.contact.github}
+
+Gloire typically responds within 24 hours and is always happy to discuss potential projects or opportunities.`;
+      }
+
+      // Construct context about Gloire to help Gemini provide accurate responses
+      const contextPrompt = `
+        You are an AI assistant for Gloire, a Full Stack Developer and AI Engineer.
+        
+        About Gloire:
+        - Full Stack Developer & AI Engineer with 3+ years of experience
+        - Currently works at ${profileData.experience[0].company}
+        - Currently studying ${profileData.education[0].degree} at ${
+        profileData.education[0].institution
+      }
+        - Specializes in web development and AI integration
+        - Skills include: ${profileData.skills.join(", ")}
+        - Email: ${profileData.contact.email}
+        - Phone: ${profileData.contact.phone}
+        
+        Answer the following question about Gloire in a helpful, professional manner.
+        Keep responses concise but informative.
+        If the user asks how to contact Gloire, provide the email and phone number.
+        
+        Question: ${query}
+      `;
+
+      const response = await fetch(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            "X-goog-api-key": process.env.NEXT_PUBLIC_GEMINI_API_KEY || "",
           },
-          body: JSON.stringify({ message: query }),
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: contextPrompt,
+                  },
+                ],
+              },
+            ],
+          }),
         }
       );
 
       if (!response.ok) {
-        throw new Error("Failed to get response");
+        console.error("Gemini API error:", await response.text());
+        throw new Error("Failed to get response from Gemini API");
       }
 
       const data = await response.json();
-      return data.message;
+
+      // Extract the response text from the Gemini API response
+      const responseText =
+        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+        "I'm sorry, I couldn't generate a response at this time.";
+
+      return responseText;
     } catch (error) {
-      console.error("Error:", error);
-      return "I apologize, but I'm having trouble connecting to my knowledge base. Please try again in a moment.";
+      console.error("Error with Gemini API:", error);
+
+      // Fallback responses if the API fails
+      const fallbackResponses = [
+        "I apologize, but I'm having trouble connecting to my knowledge base right now. Please try again in a moment.",
+        `Gloire is a Full Stack Developer and AI Engineer with experience in React, Next.js, Node.js, and AI integration. Currently working at ${profileData.experience[0].company} and studying ${profileData.education[0].degree}. You can contact Gloire at ${profileData.contact.email} or ${profileData.contact.phone}.`,
+        "Gloire specializes in building modern web applications with AI integration, focusing on performance and user experience.",
+        `If you need to get in touch with Gloire, please email ${profileData.contact.email} or call ${profileData.contact.phone}.`,
+      ];
+
+      // Return a random fallback response
+      return fallbackResponses[
+        Math.floor(Math.random() * fallbackResponses.length)
+      ];
     }
   };
 
@@ -305,10 +358,11 @@ const ChatBot = () => {
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          className="fixed bottom-4 right-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
+          className="bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-6 py-3 z-50 rounded-full font-medium transition-all flex items-center gap-2 shadow-lg shadow-[#00abf0]/20"
           aria-label="Chat with Gloire's AI Assistant"
         >
-          <MessageCircle size={24} />
+          <MessageCircle size={20} />
+          <span>Chat with AI</span>
         </motion.button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -325,106 +379,31 @@ const ChatBot = () => {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.2 }}
-          className="fixed bottom-[20px] right-[20px] w-[90vw] max-w-[400px] max-h-[85vh]"
+          className="fixed bottom-[20px] right-[20px] w-[90vw] max-w-[400px] max-h-[85vh] z-50"
         >
-          <Dialog.Content
-            className={`w-full h-full bg-white dark:bg-gray-800 rounded-lg shadow-xl overflow-hidden border ${
-              darkMode ? "border-gray-700" : "border-gray-200"
-            }`}
-          >
+          <Dialog.Content className="w-full h-full bg-[#081b29] rounded-lg shadow-xl overflow-hidden border border-[#00abf0]/20">
             <Dialog.Title className="sr-only">
               Chat with Gloire's Assistant
             </Dialog.Title>
             {/* Header */}
-            <div
-              className={`flex items-center justify-between p-4 ${
-                darkMode ? "border-gray-700" : "border-gray-200"
-              } border-b`}
-            >
-              <h3 className="text-lg font-semibold flex items-center gap-2">
-                <User size={20} className="text-indigo-500" />
+            <div className="flex items-center justify-between p-4 border-b border-[#00abf0]/20 bg-[#0a1f32]">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-white">
+                <Bot size={20} className="text-[#00abf0]" />
                 Chat with Gloire's Assistant
               </h3>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setDarkMode(!darkMode)}
-                  className={`p-2 rounded-full ${
-                    darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                  }`}
-                  title={
-                    darkMode ? "Switch to light mode" : "Switch to dark mode"
-                  }
-                >
-                  {darkMode ? (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="5" />
-                      <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                    </svg>
-                  ) : (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-                    </svg>
-                  )}
-                </button>
-                <button
-                  onClick={clearConversation}
-                  className={`p-2 rounded-full ${
-                    darkMode ? "hover:bg-gray-700" : "hover:bg-gray-100"
-                  }`}
-                  title="Clear conversation"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  </svg>
-                </button>
                 <Dialog.Close asChild>
-                  <button
-                    className={`text-${
-                      darkMode ? "gray-300" : "gray-500"
-                    } hover:text-${darkMode ? "white" : "gray-700"}`}
-                  >
+                  <button className="text-gray-400 hover:text-white transition-colors">
                     <X size={20} />
                   </button>
                 </Dialog.Close>
               </div>
             </div>
 
-            {/* Enhanced chat messages with animations */}
+            {/* Chat messages area */}
             <div
               ref={chatContainerRef}
-              className={`p-4 h-[400px] overflow-y-auto space-y-4 ${
-                darkMode ? "bg-gray-900" : "bg-gray-50"
-              }`}
+              className="p-4 h-[400px] overflow-y-auto space-y-4 bg-[#041320]"
             >
               <AnimatePresence>
                 {messages.map((msg) => (
@@ -441,10 +420,8 @@ const ChatBot = () => {
                       whileHover={{ scale: 1.02 }}
                       className={`max-w-[80%] p-3 rounded-lg ${
                         msg.role === "user"
-                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
-                          : darkMode
-                          ? "bg-gray-700 text-white"
-                          : "bg-white text-gray-800 border border-gray-200"
+                          ? "bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white"
+                          : "bg-[#0a1f32] text-white border border-[#00abf0]/20"
                       }`}
                     >
                       {msg.role === "assistant" && isTyping ? (
@@ -452,15 +429,7 @@ const ChatBot = () => {
                       ) : (
                         renderFormattedText(msg.content)
                       )}
-                      <div
-                        className={`text-xs mt-1 ${
-                          msg.role === "user"
-                            ? "text-indigo-200"
-                            : darkMode
-                            ? "text-gray-400"
-                            : "text-gray-500"
-                        }`}
-                      >
+                      <div className="text-xs mt-1 text-gray-400">
                         {new Date(msg.timestamp).toLocaleTimeString([], {
                           hour: "2-digit",
                           minute: "2-digit",
@@ -471,7 +440,7 @@ const ChatBot = () => {
                 ))}
               </AnimatePresence>
 
-              {/* Enhanced loading indicator */}
+              {/* Loading indicator */}
               <AnimatePresence>
                 {isLoading && (
                   <motion.div
@@ -480,24 +449,16 @@ const ChatBot = () => {
                     exit={{ opacity: 0, y: -10 }}
                     className="flex justify-start"
                   >
-                    <div
-                      className={`p-3 rounded-lg ${
-                        darkMode
-                          ? "bg-gray-700 text-white"
-                          : "bg-white text-gray-800 border border-gray-200"
-                      }`}
-                    >
+                    <div className="p-3 rounded-lg bg-[#0a1f32] text-white border border-[#00abf0]/20">
                       <div className="flex items-center gap-2">
-                        <RefreshCw size={16} className="animate-spin" />
+                        <RefreshCw
+                          size={16}
+                          className="animate-spin text-[#00abf0]"
+                        />
                         <span>Thinking</span>
                         <motion.span
-                          animate={{
-                            opacity: [0, 1, 0],
-                          }}
-                          transition={{
-                            duration: 1.5,
-                            repeat: Infinity,
-                          }}
+                          animate={{ opacity: [0, 1, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
                         >
                           ...
                         </motion.span>
@@ -508,7 +469,7 @@ const ChatBot = () => {
               </AnimatePresence>
             </div>
 
-            {/* Enhanced suggestions with categories */}
+            {/* Suggestions area */}
             <AnimatePresence>
               {showSuggestions &&
                 messages.length > 0 &&
@@ -517,72 +478,67 @@ const ChatBot = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: "auto" }}
                     exit={{ opacity: 0, height: 0 }}
-                    className={`px-4 py-2 ${
-                      darkMode
-                        ? "bg-gray-800 border-gray-700"
-                        : "bg-white border-gray-200"
-                    } border-t overflow-x-auto`}
+                    className="px-4 py-2 bg-[#0a1f32] border-t border-[#00abf0]/20 overflow-x-auto"
                   >
                     <div className="space-y-2">
-                      {suggestionCategories.map((category) => (
-                        <div key={category.id} className="space-y-1">
-                          <button
-                            onClick={() =>
-                              setSelectedCategory(
-                                selectedCategory === category.id
-                                  ? null
-                                  : category.id
-                              )
-                            }
-                            className="flex items-center gap-2 text-sm font-medium w-full"
-                          >
-                            <category.icon
-                              size={14}
-                              className="text-indigo-500"
-                            />
-                            {category.title}
-                          </button>
-                          <AnimatePresence>
-                            {selectedCategory === category.id && (
-                              <motion.div
-                                initial={{ opacity: 0, height: 0 }}
-                                animate={{ opacity: 1, height: "auto" }}
-                                exit={{ opacity: 0, height: 0 }}
-                                className="flex gap-2 overflow-x-auto no-scrollbar pl-6"
-                              >
-                                {category.suggestions.map((suggestion) => (
-                                  <motion.button
-                                    key={suggestion.id}
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={() =>
-                                      handleSuggestionClick(suggestion.text)
-                                    }
-                                    className={`text-xs whitespace-nowrap px-3 py-1 rounded-full ${
-                                      darkMode
-                                        ? "bg-gray-700 hover:bg-gray-600 text-white"
-                                        : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                                    }`}
-                                  >
-                                    {suggestion.text}
-                                  </motion.button>
-                                ))}
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      ))}
+                      {suggestionCategories.map(
+                        (category: SuggestionCategory) => (
+                          <div key={category.id} className="space-y-1">
+                            <button
+                              onClick={() =>
+                                setSelectedCategory(
+                                  selectedCategory === category.id
+                                    ? null
+                                    : category.id
+                                )
+                              }
+                              className="flex items-center gap-2 text-sm font-medium w-full text-white hover:text-[#00abf0] transition-colors"
+                            >
+                              <category.icon
+                                size={14}
+                                className="text-[#00abf0]"
+                              />
+                              {category.title}
+                            </button>
+                            <AnimatePresence>
+                              {selectedCategory === category.id && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: "auto" }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  className="flex gap-2 overflow-x-auto no-scrollbar pl-6"
+                                >
+                                  {category.suggestions.map(
+                                    (suggestion: {
+                                      id: string;
+                                      text: string;
+                                    }) => (
+                                      <motion.button
+                                        key={suggestion.id}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={() =>
+                                          handleSuggestionClick(suggestion.text)
+                                        }
+                                        className="text-xs whitespace-nowrap px-3 py-1 rounded-full bg-[#081b29] hover:bg-[#00abf0]/10 text-white border border-[#00abf0]/20 hover:border-[#00abf0]/50 transition-all"
+                                      >
+                                        {suggestion.text}
+                                      </motion.button>
+                                    )
+                                  )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        )
+                      )}
                     </div>
                   </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Enhanced input area */}
-            <div
-              className={`p-4 ${
-                darkMode ? "border-gray-700" : "border-gray-200"
-              } border-t`}
-            >
+            {/* Input area */}
+            <div className="p-4 border-t border-[#00abf0]/20 bg-[#0a1f32]">
               <div className="flex gap-2">
                 <motion.input
                   whileFocus={{ scale: 1.01 }}
@@ -591,18 +547,14 @@ const ChatBot = () => {
                   onChange={(e) => setInput(e.target.value)}
                   onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
                   placeholder="Ask about Gloire..."
-                  className={`flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      : "bg-white border-gray-300"
-                  }`}
+                  className="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00abf0] bg-[#081b29] border-[#00abf0]/20 text-white placeholder-gray-400"
                 />
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleSendMessage()}
                   disabled={isLoading || !input.trim()}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white p-2 rounded-lg transition-all duration-300 disabled:opacity-50"
+                  className="bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white p-2 rounded-lg transition-all duration-300 disabled:opacity-50 shadow-lg shadow-[#00abf0]/20"
                   title="Send message"
                 >
                   <Send size={20} />

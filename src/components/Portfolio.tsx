@@ -13,12 +13,16 @@ import {
   Briefcase,
   User,
   Send,
-  ExternalLink,
   RefreshCw,
   ThumbsUp,
+  Download,
+  ExternalLink,
+  ArrowUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ChatBot from "./ChatBot";
+import ContactModal from "./ContactModal";
+
 const Portfolio = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
@@ -34,6 +38,9 @@ const Portfolio = () => {
     success: false,
     error: null as string | null,
   });
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [contactSubject, setContactSubject] = useState("");
 
   // Handle navigation click
   const handleNavClick = (sectionId: string) => {
@@ -45,12 +52,13 @@ const Portfolio = () => {
     }
   };
 
-  // Monitor scroll position to update active nav
+  // Monitor scroll position to update active nav and show/hide scroll to top button
   useEffect(() => {
     const handleScroll = () => {
       const sections = document.querySelectorAll("section");
       const scrollPosition = window.scrollY + 100;
 
+      // Update active section
       sections.forEach((section) => {
         const sectionTop = section.offsetTop;
         const sectionHeight = section.offsetHeight;
@@ -63,11 +71,41 @@ const Portfolio = () => {
           setActiveSection(sectionId);
         }
       });
+
+      // Show/hide scroll to top button
+      if (window.scrollY > 500) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
     };
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Handle hire me button click
+  const handleHireMeClick = () => {
+    setContactSubject("Job Opportunity");
+    setIsContactModalOpen(true);
+  };
+
+  // Handle let's talk button click
+  const handleLetsTalkClick = () => {
+    setContactSubject("General Inquiry");
+    setIsContactModalOpen(true);
+  };
+
+  // Handle download CV
+  const handleDownloadCV = () => {
+    // Create a link to download the CV
+    const link = document.createElement("a");
+    link.href = "/files/gloire_cv.pdf"; // Update with your actual CV file path
+    link.download = "Gloire_Mugisho_CV.pdf";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="bg-[#081b29] text-white min-h-screen overflow-x-hidden">
@@ -75,6 +113,9 @@ const Portfolio = () => {
       <header className="fixed top-0 w-full z-50 bg-[#081b29]/90 backdrop-blur-md border-b border-[#00abf0]/20">
         <div className="container mx-auto flex justify-between items-center py-3 px-6">
           <div className="text-2xl font-bold flex items-center gap-2">
+            <div className="flex items-center mr-1">
+              <Image src="/logo-mg.svg" alt="MG Logo" width={28} height={28} />
+            </div>
             <span className="text-[#00abf0]">Gloire</span>
             <span className="text-xs bg-[#00abf0]/10 px-2 py-0.5 rounded-full text-[#00abf0]">
               Developer
@@ -307,10 +348,16 @@ const Portfolio = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="flex flex-wrap gap-3 pt-2"
             >
-              <button className="bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-5 py-2 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#00abf0]/20 hover:scale-105">
+              <button
+                onClick={handleHireMeClick}
+                className="bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-5 py-2 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#00abf0]/20 hover:scale-105"
+              >
                 Hire Me
               </button>
-              <button className="border border-[#00abf0] text-[#00abf0] px-5 py-2 rounded-full text-sm font-medium transition-all hover:bg-[#00abf0]/10">
+              <button
+                onClick={handleLetsTalkClick}
+                className="border border-[#00abf0] text-[#00abf0] px-5 py-2 rounded-full text-sm font-medium transition-all hover:bg-[#00abf0]/10"
+              >
                 Let's Talk
               </button>
             </motion.div>
@@ -324,7 +371,10 @@ const Portfolio = () => {
             >
               {[
                 { icon: Github, link: "https://github.com/gloirembonyi" },
-                { icon: Linkedin, link: "https://www.linkedin.com/in/gloire-mbonyi-755788250/" },
+                {
+                  icon: Linkedin,
+                  link: "https://www.linkedin.com/in/gloire-mbonyi-755788250/",
+                },
                 { icon: Mail, link: "mailto:gloirembonyi4@gmail.com" },
               ].map((social, index) => (
                 <a
@@ -363,7 +413,7 @@ const Portfolio = () => {
                 transition={{ duration: 2, repeat: Infinity, delay: 1 }}
               />
 
-              <div className="relative w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 overflow-hidden rounded-full border-4 border-[#00abf0] p-2">
+              <div className="relative w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 overflow-hidden rounded-full border-4 border-[#00abf0] p-2 group">
                 {/* Blue stripes overlay effect */}
                 <div className="absolute inset-0 rounded-full overflow-hidden">
                   <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/40 transform -translate-x-4"></div>
@@ -371,14 +421,15 @@ const Portfolio = () => {
                   <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/40 transform translate-x-6"></div>
                 </div>
 
-                {/* Profile image */}
+                {/* Profile image with hover effect */}
                 <div className="rounded-full overflow-hidden w-full h-full relative z-10">
                   <Image
-                    src="/gloire.mg.png"
+                    src="/gmz.png"
                     alt="Gloire"
                     fill
-                    className="object-cover"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#00abf0]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 </div>
               </div>
 
@@ -398,58 +449,121 @@ const Portfolio = () => {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-16 relative">
-        {/* Decorative background elements */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-[#00abf0]/5 rounded-full filter blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-[#00abf0]/5 rounded-full filter blur-3xl"></div>
+      <section id="about" className="py-20 relative overflow-hidden">
+        {/* Enhanced background elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-[#00abf0]/10 to-transparent rounded-full filter blur-3xl"></div>
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-[#00abf0]/10 to-transparent rounded-full filter blur-3xl"></div>
 
-        <div className="container mx-auto px-6">
+        {/* Animated particles */}
+        <div className="absolute inset-0 z-0 opacity-30">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-[#00abf0] rounded-full"
+              initial={{
+                x: Math.random() * 100 + "%",
+                y: Math.random() * 100 + "%",
+                opacity: Math.random() * 0.5 + 0.3,
+              }}
+              animate={{
+                x: [
+                  Math.random() * 100 + "%",
+                  Math.random() * 100 + "%",
+                  Math.random() * 100 + "%",
+                ],
+                y: [
+                  Math.random() * 100 + "%",
+                  Math.random() * 100 + "%",
+                  Math.random() * 100 + "%",
+                ],
+              }}
+              transition={{
+                duration: Math.random() * 20 + 10,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="container mx-auto px-6 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="mb-12 text-center"
+            className="mb-16 text-center"
           >
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-4xl font-bold">
               About <span className="text-[#00abf0]">Me</span>
             </h2>
-            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
+            <div className="w-20 h-1 bg-gradient-to-r from-[#00abf0] to-[#0077b6] mx-auto mt-4"></div>
           </motion.div>
 
-          <div className="flex flex-col md:flex-row gap-10 items-center">
+          <div className="flex flex-col md:flex-row gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="w-full md:w-2/5"
+              className="w-full md:w-1/5"
             >
-              <div className="relative">
-                {/* Main image with border effect */}
-                <div className="relative overflow-hidden rounded-xl border-2 border-[#00abf0] shadow-lg shadow-[#00abf0]/10">
+              <div className="relative group">
+                {/* Main image with enhanced border effect */}
+                <div className="relative overflow-hidden rounded-xl border-2 border-[#00abf0]/70 shadow-md transition-all duration-300 group-hover:shadow-lg group-hover:shadow-[#00abf0]/20 group-hover:scale-[1.02]">
                   <div className="aspect-w-4 aspect-h-5 relative">
                     <Image
-                      src="/gloire.mg.png"
+                      src="/gmz.png"
                       alt="Gloire"
                       fill
-                      className="object-cover"
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
+
+                    {/* Walking animation overlay on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#081b29]/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6">
+                      <div className="walking-animation">
+                        <div className="walking-figure">
+                          <div className="head"></div>
+                          <div className="body"></div>
+                          <div className="leg left"></div>
+                          <div className="leg right"></div>
+                          <div className="arm left"></div>
+                          <div className="arm right"></div>
+                        </div>
+                      </div>
+                      <p className="text-white text-sm font-medium">
+                        My Journey
+                      </p>
+                    </div>
                   </div>
 
                   {/* Glowing border effect */}
-                  <div className="absolute inset-0 border-2 border-[#00abf0] opacity-10 rounded-xl"></div>
+                  <div className="absolute inset-0 border border-[#00abf0]/10 rounded-xl"></div>
                 </div>
 
                 {/* Decorative elements */}
-                <div className="absolute -bottom-3 -right-3 w-20 h-20 border border-[#00abf0] rounded-lg z-[-1]"></div>
-                <div className="absolute -top-3 -left-3 w-20 h-20 border border-[#00abf0] rounded-lg z-[-1]"></div>
+                <motion.div
+                  className="absolute -bottom-3 -right-3 w-20 h-20 border-b-2 border-r-2 border-[#00abf0] rounded-br-lg z-[-1]"
+                  animate={{ opacity: [0.3, 0.7, 0.3] }}
+                  transition={{ duration: 3, repeat: Infinity }}
+                ></motion.div>
+                <motion.div
+                  className="absolute -top-3 -left-3 w-10 h-10 border-t-2 border-l-2 border-[#00abf0] rounded-tl-lg z-[-1]"
+                  animate={{ opacity: [0.3, 0.7, 0.3] }}
+                  transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
+                ></motion.div>
 
                 {/* Experience badge */}
-                <div className="absolute -bottom-4 -right-4 bg-[#081b29] border border-[#00abf0] rounded-lg py-1.5 px-3 shadow-lg">
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="absolute -bottom-4 -right-4 bg-[#081b29] border border-[#00abf0] rounded-lg py-1.5 px-3 shadow-lg"
+                >
                   <p className="text-xs text-gray-400">Experience</p>
-                  <p className="text-sm font-bold text-[#00abf0]">5+ Years</p>
-                </div>
+                  <p className="text-sm font-bold text-[#00abf0]">3+ Years</p>
+                </motion.div>
               </div>
             </motion.div>
 
@@ -458,9 +572,9 @@ const Portfolio = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="w-full md:w-3/5"
+              className="w-full md:w-4/5"
             >
-              <div className="bg-[#0a1f32]/50 p-6 rounded-xl border border-[#00abf0]/10 backdrop-blur-sm">
+              <div className="bg-[#0a1f32]/50 p-6 rounded-xl border border-[#00abf0]/10 backdrop-blur-sm hover:shadow-lg hover:shadow-[#00abf0]/5 transition-all duration-300">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <Code size={20} className="text-[#00abf0]" />
                   <span className="text-[#00abf0]">Full Stack</span> Developer &
@@ -468,29 +582,44 @@ const Portfolio = () => {
                 </h3>
 
                 <div className="space-y-4 text-sm">
-                  <p className="text-gray-300 leading-relaxed">
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
+                    className="text-gray-300 leading-relaxed"
+                  >
                     I am a passionate Full Stack Developer and AI Engineer with
                     expertise in creating visually appealing and user-friendly
                     web applications. With a strong foundation in modern web
                     technologies and AI integration, I strive to build
                     responsive, intelligent, and accessible interfaces that
                     provide exceptional user experiences.
-                  </p>
+                  </motion.p>
 
-                  <p className="text-gray-300 leading-relaxed">
+                  <motion.p
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
+                    className="text-gray-300 leading-relaxed"
+                  >
                     My approach combines creative design thinking with technical
                     excellence to deliver solutions that not only meet but
                     exceed client expectations. I enjoy staying updated with the
                     latest industry trends and continuously expanding my skill
-                    set to tackle new challenges in web development and
-                    artificial intelligence.
-                  </p>
+                    set to tackle new challenges.
+                  </motion.p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
                   {[
                     { icon: User, label: "Name", value: "Gloire Mugisho" },
-                    { icon: Mail, label: "Email", value: "info@example.com" },
+                    {
+                      icon: Mail,
+                      label: "Email",
+                      value: "gloirembonyi4@gmail.com",
+                    },
                     {
                       icon: Briefcase,
                       label: "Current Position",
@@ -498,8 +627,12 @@ const Portfolio = () => {
                     },
                     { icon: Code, label: "Projects", value: "15+ Completed" },
                   ].map((item, index) => (
-                    <div
+                    <motion.div
                       key={index}
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.3, delay: 0.6 + index * 0.1 }}
                       className="flex items-center gap-3 bg-[#081b29]/70 p-3 rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/40 transition-all group"
                     >
                       <item.icon
@@ -510,18 +643,134 @@ const Portfolio = () => {
                         <p className="text-xs text-gray-400">{item.label}</p>
                         <p className="text-sm font-medium">{item.value}</p>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
 
-                <button className="mt-6 bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-5 py-2 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#00abf0]/20 hover:scale-105 flex items-center gap-2">
-                  <span>Download CV</span>
-                  <ExternalLink size={14} />
-                </button>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: 0.9 }}
+                >
+                  <button
+                    onClick={handleDownloadCV}
+                    className="mt-6 bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-5 py-2 rounded-full text-sm font-medium transition-all hover:shadow-lg hover:shadow-[#00abf0]/20 hover:scale-105 flex items-center gap-2"
+                  >
+                    <span>Download CV</span>
+                    <Download size={14} />
+                  </button>
+                </motion.div>
               </div>
             </motion.div>
           </div>
         </div>
+
+        {/* Add CSS for walking animation */}
+        <style jsx>{`
+          .walking-animation {
+            position: relative;
+            height: 60px;
+            width: 60px;
+            margin-bottom: 10px;
+          }
+
+          .walking-figure {
+            position: relative;
+            height: 100%;
+            width: 100%;
+            animation: walk 1s infinite linear;
+          }
+
+          .head {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 15px;
+            height: 15px;
+            background: #00abf0;
+            border-radius: 50%;
+          }
+
+          .body {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 20px;
+            background: #00abf0;
+          }
+
+          .arm {
+            position: absolute;
+            top: 18px;
+            width: 2px;
+            height: 15px;
+            background: #00abf0;
+            transform-origin: top;
+          }
+
+          .arm.left {
+            left: 46%;
+            animation: swing-left 1s infinite linear;
+          }
+
+          .arm.right {
+            right: 46%;
+            animation: swing-right 1s infinite linear;
+          }
+
+          .leg {
+            position: absolute;
+            top: 35px;
+            width: 2px;
+            height: 20px;
+            background: #00abf0;
+            transform-origin: top;
+          }
+
+          .leg.left {
+            left: 46%;
+            animation: swing-left 1s infinite linear;
+          }
+
+          .leg.right {
+            right: 46%;
+            animation: swing-right 1s infinite linear;
+          }
+
+          @keyframes walk {
+            0%,
+            100% {
+              transform: translateY(0);
+            }
+            50% {
+              transform: translateY(-2px);
+            }
+          }
+
+          @keyframes swing-left {
+            0%,
+            100% {
+              transform: rotate(-30deg);
+            }
+            50% {
+              transform: rotate(30deg);
+            }
+          }
+
+          @keyframes swing-right {
+            0%,
+            100% {
+              transform: rotate(30deg);
+            }
+            50% {
+              transform: rotate(-30deg);
+            }
+          }
+        `}</style>
       </section>
 
       {/* Education & Experience Section */}
@@ -609,7 +858,7 @@ const Portfolio = () => {
 
                     <div className="bg-[#072136] p-4 rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/50 transition-all group">
                       <div className="text-[#00abf0] text-xs font-medium mb-1">
-                        2020 - Present
+                        2025 - Present
                       </div>
                       <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
                         Developer - GKK (Global Kwik Koders)
@@ -981,27 +1230,31 @@ const Portfolio = () => {
 
       {/* Floating Action Buttons */}
       <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-          className="bg-[#00abf0] hover:bg-[#0096c7] text-white p-2.5 rounded-full shadow-lg transition-all hover:shadow-[#00abf0]/20 hover:scale-110"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 15l7-7 7 7"
-            />
-          </svg>
-        </button>
+        <AnimatePresence>
+          {showScrollTop && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              className="bg-[#00abf0] hover:bg-[#0096c7] text-white p-2.5 rounded-full shadow-lg transition-all hover:shadow-[#00abf0]/20 hover:scale-110"
+            >
+              <ArrowUp size={16} />
+            </motion.button>
+          )}
+        </AnimatePresence>
         <ChatBot />
       </div>
+
+      {/* Contact Modal */}
+      <ContactModal
+        isOpen={isContactModalOpen}
+        onClose={() => setIsContactModalOpen(false)}
+        initialSubject={contactSubject}
+      />
+
+      {/* About Section - Keep your enhanced version */}
+      {/* ... existing About section code ... */}
     </div>
   );
 };

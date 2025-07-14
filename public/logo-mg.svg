@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background circle with gradient -->
+  <circle cx="100" cy="100" r="90" fill="url(#logoGradient)" />
+  
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="85" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.3" />
+  
+  <!-- Inner circle for depth -->
+  <circle cx="100" cy="100" r="75" fill="#081b29" />
+  
+  <!-- M letter -->
+  <path d="M60 70 L60 130 L70 130 L70 90 L90 115 L110 90 L110 130 L120 130 L120 70 L110 70 L90 95 L70 70 Z" fill="#ffffff" />
+  
+  <!-- G letter -->
+  <path d="M150 100 A30 30 0 1 0 150 101 L150 115 L130 115 L130 105 L140 105 L140 100 A20 20 0 1 1 140 99 L140 85 L150 85 L150 95 L130 95 L130 85 A30 30 0 0 0 130 115 L150 115 Z" fill="#00abf0" />
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00abf0" />
+      <stop offset="100%" stop-color="#0077b6" />
+    </linearGradient>
+  </defs>
+</svg> 

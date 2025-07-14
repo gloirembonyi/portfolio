@@ -483,53 +483,53 @@ Gloire typically responds within 24 hours and is always happy to discuss potenti
                     <div className="space-y-2">
                       {suggestionCategories.map(
                         (category: SuggestionCategory) => (
-                          <div key={category.id} className="space-y-1">
-                            <button
-                              onClick={() =>
-                                setSelectedCategory(
-                                  selectedCategory === category.id
-                                    ? null
-                                    : category.id
-                                )
-                              }
+                        <div key={category.id} className="space-y-1">
+                          <button
+                            onClick={() =>
+                              setSelectedCategory(
+                                selectedCategory === category.id
+                                  ? null
+                                  : category.id
+                              )
+                            }
                               className="flex items-center gap-2 text-sm font-medium w-full text-white hover:text-[#00abf0] transition-colors"
-                            >
-                              <category.icon
-                                size={14}
+                          >
+                            <category.icon
+                              size={14}
                                 className="text-[#00abf0]"
-                              />
-                              {category.title}
-                            </button>
-                            <AnimatePresence>
-                              {selectedCategory === category.id && (
-                                <motion.div
-                                  initial={{ opacity: 0, height: 0 }}
-                                  animate={{ opacity: 1, height: "auto" }}
-                                  exit={{ opacity: 0, height: 0 }}
-                                  className="flex gap-2 overflow-x-auto no-scrollbar pl-6"
-                                >
+                            />
+                            {category.title}
+                          </button>
+                          <AnimatePresence>
+                            {selectedCategory === category.id && (
+                              <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: "auto" }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="flex gap-2 overflow-x-auto no-scrollbar pl-6"
+                              >
                                   {category.suggestions.map(
                                     (suggestion: {
                                       id: string;
                                       text: string;
                                     }) => (
-                                      <motion.button
-                                        key={suggestion.id}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onClick={() =>
-                                          handleSuggestionClick(suggestion.text)
-                                        }
+                                  <motion.button
+                                    key={suggestion.id}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() =>
+                                      handleSuggestionClick(suggestion.text)
+                                    }
                                         className="text-xs whitespace-nowrap px-3 py-1 rounded-full bg-[#081b29] hover:bg-[#00abf0]/10 text-white border border-[#00abf0]/20 hover:border-[#00abf0]/50 transition-all"
-                                      >
-                                        {suggestion.text}
-                                      </motion.button>
+                                  >
+                                    {suggestion.text}
+                                  </motion.button>
                                     )
                                   )}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
                         )
                       )}
                     </div>

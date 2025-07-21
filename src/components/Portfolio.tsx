@@ -218,8 +218,8 @@ const Portfolio = () => {
           colors={["#081b29", "#0a1f32", "#041320", "#072136"]}
           className="z-0 opacity-80"
         />
-        <Starfield starCount={80} color="#00abf0" speed={0.5} />
-        <GalaxyAnimation starCount={40} galaxyCount={3} color="#00abf0" />
+        <Starfield starCount={40} color="#00abf0" speed={0.5} />
+        <GalaxyAnimation starCount={20} galaxyCount={3} color="#00abf0" />
         <NebulaBackground
           color1="rgba(0,171,240,0.1)"
           color2="rgba(128,0,255,0.08)"

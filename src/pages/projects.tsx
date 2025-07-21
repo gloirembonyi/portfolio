@@ -17,13 +17,33 @@ const Projects: React.FC = () => {
 
   const allProjects = [
     {
-      title: "AI-Powered Analytics Dashboard",
+      title: "MeetAI Platform",
       description:
-        "Real-time data visualization platform with machine learning insights. Built with React, Python, and TensorFlow.",
-      image: "/projects/analytics.jpg",
-      tags: ["React", "Python", "TensorFlow", "AWS"],
-      github: "https://github.com/gloire/analytics-dashboard",
-      demo: "https://analytics-demo.com",
+        "An AI-powered meeting assistant that transcribes and analyzes meetings in real-time. Features user authentication, meeting scheduling, and smart summaries.",
+      image: "/projects/meet-ai.jpg",
+      images: [
+        "/projects/meet-ai.jpg",
+        "/projects/meet-ai-login.jpg",
+        "/projects/meet-ai-transcription.png",
+      ],
+      tags: ["React", "Node.js", "AI", "WebRTC"],
+      github: "https://github.com/gloire/meetai",
+      demo: "https://meetai-demo.vercel.app",
+      stats: {
+        stars: 156,
+        forks: 45,
+      },
+      date: "2024-01-20",
+    },
+    {
+      title: "Plant Identifier",
+      description:
+        "Mobile-responsive application that uses computer vision to identify plant species from photos. Includes detailed information about care instructions and growing conditions.",
+      image: "/projects/plant-identify.png",
+      images: ["/projects/plant-identify.png"],
+      tags: ["TensorFlow", "React", "Firebase", "Computer Vision"],
+      github: "https://github.com/gloire/plant-identify",
+      demo: "https://plant-identify.vercel.app",
       stats: {
         stars: 128,
         forks: 34,
@@ -31,13 +51,14 @@ const Projects: React.FC = () => {
       date: "2024-03-01",
     },
     {
-      title: "Blockchain Trading Platform",
+      title: "Modern Login UI",
       description:
-        "Decentralized exchange with smart contract integration. Supports multiple cryptocurrencies and real-time trading.",
-      image: "/projects/blockchain.jpg",
-      tags: ["Solidity", "Web3.js", "Node.js", "MongoDB"],
-      github: "https://github.com/gloire/crypto-trade",
-      demo: "https://crypto-trade-demo.com",
+        "A beautifully designed login interface with advanced animations, form validation, and social sign-in options. Optimized for accessibility and responsiveness.",
+      image: "/projects/best-login-design.png",
+      images: ["/projects/best-login-design.png"],
+      tags: ["React", "Tailwind CSS", "Framer Motion", "Authentication"],
+      github: "https://github.com/gloire/modern-login",
+      demo: "https://modern-login-ui.vercel.app",
       stats: {
         stars: 89,
         forks: 23,
@@ -45,18 +66,49 @@ const Projects: React.FC = () => {
       date: "2024-02-15",
     },
     {
-      title: "IoT Device Management System",
+      title: "Private Project 1",
       description:
-        "Cloud-based platform for managing IoT devices at scale. Features real-time monitoring and automated deployments.",
-      image: "/projects/iot.jpg",
-      tags: ["React", "Node.js", "MQTT", "Azure"],
-      github: "https://github.com/gloire/iot-manager",
-      demo: "https://iot-demo.com",
+        "A confidential project involving blockchain technology and financial data visualization. Features secure transactions and real-time market monitoring.",
+      image: "/projects/private-project-1.jpg",
+      images: ["/projects/private-project-1.jpg"],
+      tags: ["Blockchain", "TypeScript", "GraphQL", "Security"],
+      github: "https://github.com/gloire/private-repo-1",
+      demo: "#",
       stats: {
-        stars: 156,
-        forks: 45,
+        stars: 42,
+        forks: 12,
       },
-      date: "2024-01-20",
+      date: "2023-12-10",
+    },
+    {
+      title: "Private Project 2",
+      description:
+        "Enterprise-level data management system with advanced analytics and reporting capabilities. Includes role-based access control and audit logging.",
+      image: "/projects/private-project-2.png",
+      images: ["/projects/private-project-2.png"],
+      tags: ["SQL", "Python", "React", "AWS"],
+      github: "https://github.com/gloire/private-repo-2",
+      demo: "#",
+      stats: {
+        stars: 76,
+        forks: 18,
+      },
+      date: "2023-11-05",
+    },
+    {
+      title: "Private Project 3",
+      description:
+        "IoT platform for smart home automation and energy optimization. Features machine learning algorithms for predictive maintenance and usage patterns.",
+      image: "/projects/private-project-3.png",
+      images: ["/projects/private-project-3.png"],
+      tags: ["IoT", "Machine Learning", "React Native", "MongoDB"],
+      github: "https://github.com/gloire/private-repo-3",
+      demo: "#",
+      stats: {
+        stars: 62,
+        forks: 15,
+      },
+      date: "2023-10-20",
     },
   ];
 
@@ -113,7 +165,7 @@ const Projects: React.FC = () => {
             className="text-center mb-16"
           >
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          Featured Projects
+              Featured Projects
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               Here are some of my recent projects that showcase my skills and
@@ -188,15 +240,36 @@ const Projects: React.FC = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                     transition={{ delay: index * 0.1 }}
-                    className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                    className="bg-white rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 border border-gray-100"
+                    whileHover={{
+                      y: -5,
+                      boxShadow: "0 25px 50px -12px rgba(0, 171, 240, 0.25)",
+                    }}
                   >
                     <div className="grid md:grid-cols-2 gap-8">
-                      <div className="relative h-64 md:h-full min-h-[16rem] bg-gray-200">
-                        <img
+                      <div className="relative h-64 md:h-full min-h-[16rem] bg-gray-100 overflow-hidden group">
+                        {/* Main Image */}
+                        <motion.img
                           src={project.image}
                           alt={project.title}
-                          className="absolute inset-0 w-full h-full object-cover"
+                          className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-700 group-hover:scale-105"
                         />
+
+                        {/* Gradient Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
+
+                        {/* Image Navigation */}
+                        {project.images && project.images.length > 1 && (
+                          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {project.images.map((img, i) => (
+                              <motion.button
+                                key={i}
+                                className="w-2 h-2 rounded-full bg-white/70 hover:bg-white"
+                                whileHover={{ scale: 1.5 }}
+                              ></motion.button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="p-8">
                         <h3 className="text-2xl font-bold text-gray-900 mb-4">
@@ -208,25 +281,35 @@ const Projects: React.FC = () => {
 
                         <div className="flex flex-wrap gap-2 mb-6">
                           {project.tags.map((tag, tagIndex) => (
-                            <span
+                            <motion.span
                               key={tagIndex}
                               className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+                              whileHover={{
+                                scale: 1.05,
+                                backgroundColor: "rgb(209 250 229)",
+                              }}
                             >
                               {tag}
-                            </span>
+                            </motion.span>
                           ))}
                         </div>
 
                         <div className="flex items-center justify-between mb-6">
                           <div className="flex items-center space-x-4">
-                            <div className="flex items-center text-gray-600">
+                            <motion.div
+                              className="flex items-center text-gray-600"
+                              whileHover={{ scale: 1.1, color: "#00abf0" }}
+                            >
                               <Star className="w-4 h-4 mr-1" />
                               <span>{project.stats.stars}</span>
-                            </div>
-                            <div className="flex items-center text-gray-600">
+                            </motion.div>
+                            <motion.div
+                              className="flex items-center text-gray-600"
+                              whileHover={{ scale: 1.1, color: "#00abf0" }}
+                            >
                               <GitFork className="w-4 h-4 mr-1" />
                               <span>{project.stats.forks}</span>
-                            </div>
+                            </motion.div>
                           </div>
                           <span className="text-sm text-gray-500">
                             {new Date(project.date).toLocaleDateString()}
@@ -240,7 +323,7 @@ const Projects: React.FC = () => {
                             rel="noopener noreferrer"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center space-x-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors"
+                            className="flex items-center space-x-2 bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition-colors shadow-md hover:shadow-xl"
                           >
                             <Github size={20} />
                             <span>View Code</span>
@@ -251,7 +334,7 @@ const Projects: React.FC = () => {
                             rel="noopener noreferrer"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="flex items-center space-x-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                            className="flex items-center space-x-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg transition-all shadow-md hover:shadow-xl hover:from-green-600 hover:to-green-700"
                           >
                             <ExternalLink size={20} />
                             <span>Live Demo</span>

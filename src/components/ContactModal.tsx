@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, RefreshCw, ThumbsUp, Mail } from "lucide-react";
 import Image from "next/image";
+import { gsap } from "gsap";
 
 interface ContactModalProps {
   isOpen: boolean;
@@ -30,12 +31,35 @@ const ContactModal = ({
     error: null as string | null,
   });
 
+  const modalRef = useRef<HTMLDivElement>(null);
+
   // Update subject when initialSubject prop changes
   useEffect(() => {
     if (initialSubject) {
       setFormData((prev) => ({ ...prev, subject: initialSubject }));
     }
   }, [initialSubject]);
+
+  // GSAP animation for modal
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      gsap.fromTo(
+        modalRef.current,
+        {
+          opacity: 0,
+          scale: 0.9,
+          y: 20,
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          duration: 0.3,
+          ease: "power2.out",
+        }
+      );
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,15 +117,18 @@ const ContactModal = ({
                 />
               </Dialog.Overlay>
               <Dialog.Content asChild>
-                <motion.div
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-md bg-[#081b29] border border-[#00abf0]/30 rounded-xl shadow-xl z-[60] p-4 sm:p-6 max-h-[90vh] sm:max-h-[85vh] overflow-y-auto"
-                  style={{ maxWidth: "min(450px, 90vw)" }}
+                <div
+                  ref={modalRef}
+                  className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-lg bg-[#081b29] border border-[#00abf0]/30 rounded-xl shadow-xl z-[60] p-4 sm:p-6 max-h-[90vh] flex flex-col overflow-hidden"
+                  style={{ 
+                    maxWidth: "min(550px, 90vw)",
+                    maxHeight: "90vh",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                  }}
                 >
-                  <div className="text-center mb-6">
+                  <div className="text-center mb-6 flex-shrink-0">
                     <div className="flex justify-center mb-3">
                       <div className="w-12 h-12 bg-[#00abf0]/10 rounded-full flex items-center justify-center">
                         <Mail size={24} className="text-[#00abf0]" />
@@ -111,12 +138,12 @@ const ContactModal = ({
                       <span className="text-[#00abf0] mr-2">Get</span> In Touch
                     </Dialog.Title>
                     <Dialog.Description className="text-sm text-gray-300 mt-2">
-                      Fill out the form below and I'll get back to you as soon
+                      Fill out the form below and I&apos;ll get back to you as soon
                       as possible.
                     </Dialog.Description>
                   </div>
 
-                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <form onSubmit={handleSubmit} className="space-y-4 flex-1 overflow-y-auto min-h-0 pr-2 custom-scrollbar">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label
@@ -271,7 +298,23 @@ const ContactModal = ({
                       </button>
                     </Dialog.Close>
                   </div>
-                </motion.div>
+                  <style jsx>{`
+                    .custom-scrollbar::-webkit-scrollbar {
+                      width: 6px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-track {
+                      background: rgba(10, 31, 50, 0.5);
+                      border-radius: 3px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                      background: rgba(0, 171, 240, 0.3);
+                      border-radius: 3px;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                      background: rgba(0, 171, 240, 0.5);
+                    }
+                  `}</style>
+                </div>
               </Dialog.Content>
             </>
           )}

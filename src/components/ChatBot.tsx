@@ -10,7 +10,6 @@ import {
   Code,
   Mail,
   RefreshCw,
-  ThumbsUp,
 } from "lucide-react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { motion, AnimatePresence } from "framer-motion";
@@ -52,14 +51,9 @@ interface Message {
   timestamp: Date;
 }
 
-interface Suggestion {
-  id: string;
-  text: string;
-}
-
 interface SuggestionCategory {
   id: string;
-  icon: any;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
   title: string;
   suggestions: Array<{ id: string; text: string }>;
 }
@@ -95,7 +89,6 @@ const ChatBot = () => {
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -105,15 +98,6 @@ const ChatBot = () => {
 
   // Generate unique IDs for messages
   const generateId = (): string => Math.random().toString(36).substring(2, 11);
-
-  // Suggestions about Gloire
-  const suggestions: Suggestion[] = [
-    { id: "skills", text: "What are your main technical skills?" },
-    { id: "projects", text: "Tell me about your most impressive project" },
-    { id: "experience", text: "What's your development experience?" },
-    { id: "contact", text: "How can I get in touch with you?" },
-    { id: "stack", text: "What's your preferred tech stack?" },
-  ];
 
   // Enhanced suggestions with categories
   const suggestionCategories: SuggestionCategory[] = [
@@ -336,11 +320,6 @@ Gloire typically responds within 24 hours and is always happy to discuss potenti
     handleSendMessage(suggestion);
   };
 
-  // Clear conversation
-  const clearConversation = () => {
-    setMessages([]);
-  };
-
   // Render markdown-like formatting (simple version)
   const renderFormattedText = (text: string) => {
     // Bold text
@@ -362,7 +341,6 @@ Gloire typically responds within 24 hours and is always happy to discuss potenti
           aria-label="Chat with Gloire's AI Assistant"
         >
           <MessageCircle size={20} />
-          <span>Chat with AI</span>
         </motion.button>
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -379,17 +357,17 @@ Gloire typically responds within 24 hours and is always happy to discuss potenti
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.2 }}
-          className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-[500px] max-h-[90vh] z-50"
+          className="fixed bottom-6 right-6 w-[90vw] max-w-[420px] h-[600px] max-h-[85vh] z-50"
         >
-          <Dialog.Content className="w-full h-full bg-[#081b29] rounded-lg shadow-xl overflow-hidden border border-[#00abf0]/20">
+          <Dialog.Content className="w-full h-full bg-[#081b29] rounded-lg shadow-xl overflow-hidden border border-[#00abf0]/20 flex flex-col">
             <Dialog.Title className="sr-only">
-              Chat with Gloire's Assistant
+              Chat with Gloire&apos;s Assistant
             </Dialog.Title>
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-[#00abf0]/20 bg-[#0a1f32]">
               <h3 className="text-lg font-semibold flex items-center gap-2 text-white">
                 <Bot size={20} className="text-[#00abf0]" />
-                Chat with Gloire's Assistant
+                Chat with Gloire&apos;s Assistant
               </h3>
               <div className="flex items-center gap-2">
                 <Dialog.Close asChild>
@@ -403,7 +381,7 @@ Gloire typically responds within 24 hours and is always happy to discuss potenti
             {/* Chat messages area */}
             <div
               ref={chatContainerRef}
-              className="p-4 h-[400px] overflow-y-auto space-y-4 bg-[#041320]"
+              className="p-4 flex-1 overflow-y-auto space-y-4 bg-[#041320] min-h-0"
             >
               <AnimatePresence>
                 {messages.map((msg) => (

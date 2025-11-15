@@ -1,18 +1,40 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Galaxy Animation Component
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
+
+// Galaxy Animation Component with realistic stars
 export const GalaxyAnimation: React.FC<{
   starCount?: number;
   galaxyCount?: number;
   color?: string;
-}> = ({ starCount = 100, galaxyCount = 5, color = "#00abf0" }) => {
+}> = ({ starCount = 100, galaxyCount = 5, color }) => {
+  // Realistic star colors
+  const starColors = [
+    "#ffffff", "#b8d4ff", "#f0f0ff", "#fff4e6", "#ffd4a3", "#ffb366"
+  ];
+
+  const getStarColor = () => {
+    const rand = Math.random();
+    if (rand < 0.05) return starColors[0];
+    if (rand < 0.15) return starColors[1];
+    if (rand < 0.35) return starColors[2];
+    if (rand < 0.65) return starColors[3];
+    if (rand < 0.85) return starColors[4];
+    return starColors[5];
+  };
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
       {/* Stars */}
       {Array.from({ length: starCount }).map((_, i) => {
-        const size = Math.random() * 2 + 1;
-        const opacity = Math.random() * 0.7 + 0.3;
+        const size = Math.random() * 1.5 + 0.5;
+        const opacity = Math.random() * 0.6 + 0.4;
+        const starColor = color || getStarColor();
         return (
           <motion.div
             key={`star-${i}`}
@@ -20,21 +42,20 @@ export const GalaxyAnimation: React.FC<{
             style={{
               width: size,
               height: size,
-              backgroundColor: color,
-              boxShadow: `0 0 ${size * 2}px ${color}`,
+              backgroundColor: starColor,
+              boxShadow: `0 0 ${size * 0.5}px ${starColor}, 0 0 ${size}px ${starColor}40`,
               opacity,
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
             }}
             animate={{
-              opacity: [opacity, opacity * 1.5, opacity],
-              scale: [1, 1.2, 1],
+              opacity: [opacity, opacity * 1.2, opacity],
             }}
             transition={{
-              duration: 1 + Math.random() * 3,
+              duration: 2 + Math.random() * 4,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: Math.random() * 3,
+              delay: Math.random() * 5,
             }}
           />
         );
@@ -111,18 +132,41 @@ export const GalaxyAnimation: React.FC<{
   );
 };
 
-// Starfield Animation
+// Starfield Animation with realistic star colors
 export const Starfield: React.FC<{
   starCount?: number;
   color?: string;
   speed?: number;
-}> = ({ starCount = 200, color = "#00abf0", speed = 1 }) => {
+}> = ({ starCount = 200, color, speed = 1 }) => {
+  // Realistic star colors based on stellar classification
+  const starColors = [
+    "#ffffff", // White (O/B type stars - hottest)
+    "#b8d4ff", // Blue-white (A type)
+    "#f0f0ff", // White (F type)
+    "#fff4e6", // Yellow-white (G type - like our Sun)
+    "#ffd4a3", // Orange (K type)
+    "#ffb366", // Orange-red (M type - coolest)
+  ];
+
+  const getStarColor = () => {
+    const rand = Math.random();
+    if (rand < 0.05) return starColors[0]; // 5% - hot blue-white
+    if (rand < 0.15) return starColors[1]; // 10% - blue-white
+    if (rand < 0.35) return starColors[2]; // 20% - white
+    if (rand < 0.65) return starColors[3]; // 30% - yellow-white (most common)
+    if (rand < 0.85) return starColors[4]; // 20% - orange
+    return starColors[5]; // 15% - orange-red
+  };
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       <div className="starfield">
         {Array.from({ length: starCount }).map((_, i) => {
-          const size = Math.random() * 2 + 1;
+          const size = Math.random() * 1.5 + 0.5; // Smaller, more realistic sizes
           const distance = Math.random() * 100;
+          const starColor = color || getStarColor();
+          const opacity = Math.min(0.9, (size - 0.3) / 1.5 + Math.random() * 0.3);
+          
           return (
             <div
               key={i}
@@ -134,8 +178,9 @@ export const Starfield: React.FC<{
                 left: `${Math.random() * 100}%`,
                 animationDuration: `${(1 / (distance / 100)) * 50 * speed}s`,
                 animationDelay: `${Math.random() * 50}s`,
-                opacity: Math.min(1, (size - 0.5) / 2),
-                boxShadow: `0 0 ${size}px ${size / 2}px ${color}`,
+                opacity,
+                backgroundColor: starColor,
+                boxShadow: `0 0 ${size * 0.5}px ${starColor}, 0 0 ${size}px ${starColor}40`,
               }}
             ></div>
           );
@@ -150,7 +195,6 @@ export const Starfield: React.FC<{
         }
         .star {
           position: absolute;
-          background-color: ${color};
           border-radius: 50%;
           animation: starMotion linear infinite;
         }
@@ -211,14 +255,72 @@ export const NebulaBackground: React.FC<{
   );
 };
 
-// Advanced Rain Animation Component
-export const RainAnimation: React.FC<{ density?: number; color?: string }> = ({
+// Advanced Rain Animation Component with GSAP ScrollTrigger
+export const RainAnimation: React.FC<{ 
+  density?: number; 
+  color?: string;
+  scrollTrigger?: boolean;
+}> = ({
   density = 30,
   color = "#00abf0",
+  scrollTrigger = false,
 }) => {
+  const [isVisible, setIsVisible] = React.useState(!scrollTrigger);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const rainRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (!scrollTrigger || !containerRef.current || !rainRef.current) return;
+    if (typeof window === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          setIsVisible(entry.isIntersecting);
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(containerRef.current);
+
+    // GSAP ScrollTrigger for upward movement
+    const scrollTriggerInstance = ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: "top bottom",
+      end: "bottom top",
+      scrub: 0.5,
+      onUpdate: (self) => {
+        if (rainRef.current) {
+          const progress = self.progress;
+          gsap.to(rainRef.current, {
+            y: -progress * 200,
+            duration: 0.1,
+            ease: "none",
+          });
+        }
+      },
+    });
+
+    return () => {
+      observer.disconnect();
+      scrollTriggerInstance.kill();
+    };
+  }, [scrollTrigger]);
+
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-      <div className="rain-container">
+    <div 
+      ref={containerRef}
+      className="absolute inset-0 overflow-hidden pointer-events-none z-0"
+    >
+      <div 
+        ref={rainRef}
+        className="rain-container" 
+        style={{ 
+          opacity: isVisible ? 1 : 0,
+          transition: 'opacity 0.3s ease',
+        }}
+      >
         {Array.from({ length: density }).map((_, i) => (
           <div
             key={i}
@@ -228,6 +330,7 @@ export const RainAnimation: React.FC<{ density?: number; color?: string }> = ({
               animationDuration: `${Math.random() * 1 + 0.5}s`,
               animationDelay: `${Math.random() * 2}s`,
               background: `linear-gradient(to bottom, transparent, ${color})`,
+              animationPlayState: isVisible ? 'running' : 'paused',
             }}
           ></div>
         ))}
@@ -254,7 +357,7 @@ export const RainAnimation: React.FC<{ density?: number; color?: string }> = ({
             opacity: 0.7;
           }
           100% {
-            transform: translateY(calc(100vh));
+            transform: translateY(calc(100vh + 20px));
             opacity: 0;
           }
         }

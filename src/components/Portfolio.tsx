@@ -24,19 +24,14 @@ import ChatBot from "./ChatBot";
 import ContactModal from "./ContactModal";
 import {
   RainAnimation,
-  FloatingParticles,
-  GlowingBorder,
-  MovingLines,
-  MovingDotsOnLine,
-  CyberGrid,
-  GlowingOrbs,
   AnimatedGradient,
   DigitalCircuit,
-  MatrixRain,
   Starfield,
   GalaxyAnimation,
   NebulaBackground,
 } from "./AnimationComponents";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Component as LoginPage } from "@/components/ui/animated-characters-login-page";
 
 const Portfolio = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -56,6 +51,7 @@ const Portfolio = () => {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [contactSubject, setContactSubject] = useState("");
+  const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
 
   // Handle navigation click
   const handleNavClick = (sectionId: string) => {
@@ -218,14 +214,14 @@ const Portfolio = () => {
           colors={["#081b29", "#0a1f32", "#041320", "#072136"]}
           className="z-0 opacity-80"
         />
-        <Starfield starCount={40} color="#00abf0" speed={0.5} />
-        <GalaxyAnimation starCount={20} galaxyCount={3} color="#00abf0" />
+        <Starfield starCount={40} speed={0.5} />
+        <GalaxyAnimation starCount={20} galaxyCount={3} />
         <NebulaBackground
           color1="rgba(0,171,240,0.1)"
           color2="rgba(128,0,255,0.08)"
           intensity={0.6}
         />
-        <RainAnimation density={5} color="rgba(0,171,240,0.5)" />
+        <RainAnimation density={5} color="rgba(0,171,240,0.5)" scrollTrigger={true} />
 
         {/* Content */}
         <div className="container mx-auto px-6 z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
@@ -248,20 +244,10 @@ const Portfolio = () => {
               transition={{ duration: 0.5 }}
               className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
             >
-              Hi, I'm{" "}
-              <motion.span
-                className="text-[#00abf0] inline-block"
-                animate={{
-                  textShadow: [
-                    "0 0 5px rgba(0,171,240,0.3)",
-                    "0 0 15px rgba(0,171,240,0.7)",
-                    "0 0 5px rgba(0,171,240,0.3)",
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
+              Hi, I&apos;m{" "}
+              <span className="text-[#00abf0] inline-block">
                 Gloire
-              </motion.span>
+              </span>
             </motion.h1>
 
             <motion.div
@@ -271,21 +257,13 @@ const Portfolio = () => {
               className="space-y-3"
             >
               <h2 className="text-xl md:text-2xl font-medium text-gray-300">
-                <motion.span
-                  className="text-[#00abf0]"
-                  animate={{ color: ["#00abf0", "#0077b6", "#00abf0"] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                >
+                <span className="text-[#00abf0]">
                   Full Stack Developer
-                </motion.span>{" "}
+                </span>{" "}
                 &{" "}
-                <motion.span
-                  className="text-[#00abf0]"
-                  animate={{ color: ["#00abf0", "#0077b6", "#00abf0"] }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
-                >
+                <span className="text-[#00abf0]">
                   AI Engineer
-                </motion.span>
+                </span>
               </h2>
               <p className="text-gray-400 max-w-lg text-sm md:text-base backdrop-blur-sm bg-[#081b29]/30 p-3 rounded-lg border border-[#00abf0]/10">
                 I specialize in building modern web applications and AI
@@ -309,23 +287,22 @@ const Portfolio = () => {
                 { name: "AI", icon: "/icons/ai.svg" },
                 { name: "MongoDB", icon: "" },
               ].map((tech, index) => (
-                <GlowingBorder key={index} intensity={0.2}>
-                  <motion.span
-                    whileHover={{ scale: 1.05, y: -2 }}
-                    className="bg-[#0a1f32] text-xs px-3 py-1 rounded-full border border-[#00abf0]/20 text-gray-300 flex items-center gap-1.5 hover:border-[#00abf0]/50 transition-colors backdrop-blur-sm"
-                  >
-                    {tech.icon && (
-                      <Image
-                        src={tech.icon}
-                        alt={tech.name}
-                        width={12}
-                        height={12}
-                        className="opacity-80"
-                      />
-                    )}
-                    {tech.name}
-                  </motion.span>
-                </GlowingBorder>
+                <motion.span
+                  key={index}
+                  whileHover={{ scale: 1.05, y: -2 }}
+                  className="bg-[#0a1f32] text-xs px-3 py-1 rounded-full border border-[#00abf0]/20 text-gray-300 flex items-center gap-1.5 hover:border-[#00abf0]/50 transition-colors backdrop-blur-sm"
+                >
+                  {tech.icon && (
+                    <Image
+                      src={tech.icon}
+                      alt={tech.name}
+                      width={12}
+                      height={12}
+                      className="opacity-80"
+                    />
+                  )}
+                  {tech.name}
+                </motion.span>
               ))}
             </motion.div>
 
@@ -356,7 +333,7 @@ const Portfolio = () => {
                 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Let's Talk
+                Let&apos;s Talk
               </motion.button>
             </motion.div>
 
@@ -404,31 +381,9 @@ const Portfolio = () => {
             className="w-full md:w-1/2 flex justify-center"
           >
             <div className="relative">
-              {/* Decorative elements with enhanced animations */}
-              <motion.div
-                className="absolute -top-4 -left-4 w-20 h-20 border-t-2 border-l-2 border-[#00abf0]/30"
-                animate={{
-                  opacity: [0.3, 0.6, 0.3],
-                  borderColor: [
-                    "rgba(0,171,240,0.3)",
-                    "rgba(0,171,240,0.6)",
-                    "rgba(0,171,240,0.3)",
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              />
-              <motion.div
-                className="absolute -bottom-4 -right-4 w-20 h-20 border-b-2 border-r-2 border-[#00abf0]/30"
-                animate={{
-                  opacity: [0.3, 0.6, 0.3],
-                  borderColor: [
-                    "rgba(0,171,240,0.3)",
-                    "rgba(0,171,240,0.6)",
-                    "rgba(0,171,240,0.3)",
-                  ],
-                }}
-                transition={{ duration: 2, repeat: Infinity, delay: 1 }}
-              />
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -left-4 w-20 h-20 border-t-2 border-l-2 border-[#00abf0]/20"></div>
+              <div className="absolute -bottom-4 -right-4 w-20 h-20 border-b-2 border-r-2 border-[#00abf0]/20"></div>
 
               <div className="relative w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80 overflow-hidden rounded-full border-4 border-[#00abf0] p-2 group">
                 {/* Moving dots around the profile image */}
@@ -460,23 +415,11 @@ const Portfolio = () => {
                   })} */}
                 </div>
 
-                {/* Blue stripes overlay effect with animation */}
+                {/* Blue stripes overlay effect */}
                 <div className="absolute inset-0 rounded-full overflow-hidden">
-                  <motion.div
-                    className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/40 transform -translate-x-4"
-                    animate={{ opacity: [0.2, 0.5, 0.2] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  ></motion.div>
-                  <motion.div
-                    className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/40 transform translate-x-2"
-                    animate={{ opacity: [0.2, 0.5, 0.2] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: 1 }}
-                  ></motion.div>
-                  <motion.div
-                    className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/40 transform translate-x-6"
-                    animate={{ opacity: [0.2, 0.5, 0.2] }}
-                    transition={{ duration: 3, repeat: Infinity, delay: 2 }}
-                  ></motion.div>
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/30 transform -translate-x-4"></div>
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/30 transform translate-x-2"></div>
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-[#00abf0]/30 transform translate-x-6"></div>
                 </div>
 
                 {/* Profile image with enhanced hover effect */}
@@ -487,17 +430,7 @@ const Portfolio = () => {
                     fill
                     className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <motion.div
-                    className="absolute inset-0 bg-gradient-to-t from-[#00abf0]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                    animate={{
-                      background: [
-                        "linear-gradient(to top, rgba(0,171,240,0.5), transparent)",
-                        "linear-gradient(to top, rgba(0,119,182,0.5), transparent)",
-                        "linear-gradient(to top, rgba(0,171,240,0.5), transparent)",
-                      ],
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#00abf0]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
                   {/* Digital circuit overlay on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300">
@@ -511,31 +444,20 @@ const Portfolio = () => {
                 </div>
               </div>
 
-              {/* Experience badge with enhanced animation */}
+              {/* Experience badge */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6, duration: 0.5 }}
                 className="absolute -bottom-2 -right-2 bg-[#081b29] border border-[#00abf0] rounded-lg py-1.5 px-3 shadow-lg backdrop-blur-sm"
                 whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 0 15px rgba(0,171,240,0.5)",
+                  scale: 1.02,
                 }}
               >
                 <p className="text-xs text-gray-400">Full Stack & AI</p>
-                <motion.p
-                  className="text-sm font-bold text-[#00abf0]"
-                  animate={{
-                    textShadow: [
-                      "0 0 3px rgba(0,171,240,0)",
-                      "0 0 8px rgba(0,171,240,0.7)",
-                      "0 0 3px rgba(0,171,240,0)",
-                    ],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                >
+                <p className="text-sm font-bold text-[#00abf0]">
                   Developer
-                </motion.p>
+                </p>
               </motion.div>
             </div>
           </motion.div>
@@ -543,21 +465,11 @@ const Portfolio = () => {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-10 relative overflow-hidden">
-        {/* Enhanced background elements */}
+      <section id="about" className="py-16 relative overflow-hidden bg-[#081b29]">
+        {/* Clean background */}
         <AnimatedGradient
-          colors={["#081b29", "#041320", "#072136", "#081b29"]}
-          className="z-0 opacity-80"
-        />
-        <RainAnimation density={8} color="rgba(0,171,240,0.4)" />
-        <GlowingOrbs count={2} color="#00abf0" minSize={150} maxSize={350} />
-
-        {/* Animated particles with enhanced settings */}
-        <FloatingParticles
-          count={15}
-          color="#00abf0"
-          size={1.5}
-          opacity={0.5}
+          colors={["#081b29", "#0a1f32", "#081b29"]}
+          className="z-0 opacity-60"
         />
 
         <div className="container mx-auto px-6 relative z-10">
@@ -583,95 +495,31 @@ const Portfolio = () => {
               className="w-full md:w-1/3"
             >
               <div className="relative group">
-                {/* Main image with enhanced border effect */}
-                <GlowingBorder intensity={0.4} className="rounded-xl">
-                  <div className="relative overflow-hidden rounded-xl border-2 border-[#00abf0]/70 shadow-lg transition-all duration-300 group-hover:shadow-xl group-hover:shadow-[#00abf0]/20 group-hover:scale-[1.02]">
-                    <div className="aspect-w-4 aspect-h-5 relative h-[400px]">
-                      <Image
-                        src="/dev-gloire.jpeg"
-                        alt="Gloire"
-                        fill
-                        className="object-cover object-center transition-transform duration-700 group-hover:scale-110"
-                        priority
-                      />
-
-                      {/* Digital circuit overlay on hover */}
-                      <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300 z-10">
-                        <DigitalCircuit
-                          color="#ffffff"
-                          lineWidth={0.5}
-                          nodeSize={2}
-                          speed={3}
-                        />
-                      </div>
-
-                      {/* Gradient overlay for better visibility */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#081b29]/50 to-transparent opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
-                    </div>
-
-                    {/* Moving dots on border */}
-                    <div className="absolute inset-0 pointer-events-none">
-                      <MovingDotsOnLine count={5} direction="horizontal" />
-                      <MovingDotsOnLine count={5} direction="vertical" />
-                    </div>
-
-                    {/* Glowing border effect */}
-                    <div className="absolute inset-0 border border-[#00abf0]/10 rounded-xl"></div>
+                {/* Clean image with simple border */}
+                <div className="relative overflow-hidden rounded-xl border-2 border-[#00abf0]/30 shadow-lg transition-all duration-300 group-hover:border-[#00abf0]/50">
+                  <div className="aspect-w-4 aspect-h-5 relative h-[400px]">
+                    <Image
+                      src="/dev-gloire.jpeg"
+                      alt="Gloire"
+                      fill
+                      className="object-cover object-center"
+                      priority
+                    />
                   </div>
-                </GlowingBorder>
+                </div>
 
-                {/* Decorative elements with animation */}
+                {/* Experience badge */}
                 <motion.div
-                  className="absolute -bottom-3 -right-3 w-20 h-20 border-b-2 border-r-2 border-[#00abf0] rounded-br-lg z-[-1]"
-                  animate={{
-                    opacity: [0.3, 0.7, 0.3],
-                    borderColor: [
-                      "rgba(0,171,240,0.5)",
-                      "rgba(0,119,182,0.7)",
-                      "rgba(0,171,240,0.5)",
-                    ],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                ></motion.div>
-                <motion.div
-                  className="absolute -top-3 -left-3 w-10 h-10 border-t-2 border-l-2 border-[#00abf0] rounded-tl-lg z-[-1]"
-                  animate={{
-                    opacity: [0.3, 0.7, 0.3],
-                    borderColor: [
-                      "rgba(0,171,240,0.5)",
-                      "rgba(0,119,182,0.7)",
-                      "rgba(0,171,240,0.5)",
-                    ],
-                  }}
-                  transition={{ duration: 3, repeat: Infinity, delay: 1.5 }}
-                ></motion.div>
-
-                {/* Experience badge with enhanced animation */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
-                  whileHover={{
-                    scale: 1.05,
-                    boxShadow: "0 0 15px rgba(0,171,240,0.5)",
-                  }}
+                  transition={{ duration: 0.3 }}
                   className="absolute -bottom-4 -right-4 bg-[#081b29] border border-[#00abf0] rounded-lg py-1.5 px-3 shadow-lg backdrop-blur-sm"
                 >
                   <p className="text-xs text-gray-400">Experience</p>
-                  <motion.p
-                    className="text-sm font-bold text-[#00abf0]"
-                    animate={{
-                      textShadow: [
-                        "0 0 3px rgba(0,171,240,0)",
-                        "0 0 8px rgba(0,171,240,0.7)",
-                        "0 0 3px rgba(0,171,240,0)",
-                      ],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
+                  <p className="text-sm font-bold text-[#00abf0]">
                     3+ Years
-                  </motion.p>
+                  </p>
                 </motion.div>
               </div>
             </motion.div>
@@ -683,27 +531,10 @@ const Portfolio = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="w-full md:w-2/3"
             >
-              <div className="bg-[#0a1f32]/50 p-6 rounded-xl border border-[#00abf0]/10 backdrop-blur-sm hover:shadow-lg hover:shadow-[#00abf0]/5 transition-all duration-300">
+              <div className="bg-[#0a1f32]/50 p-6 rounded-xl border border-[#00abf0]/10 backdrop-blur-sm">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ duration: 5, repeat: Infinity }}
-                  >
-                    <Code size={20} className="text-[#00abf0]" />
-                  </motion.div>
-                  <motion.span
-                    className="text-[#00abf0]"
-                    animate={{
-                      textShadow: [
-                        "0 0 3px rgba(0,171,240,0)",
-                        "0 0 8px rgba(0,171,240,0.5)",
-                        "0 0 3px rgba(0,171,240,0)",
-                      ],
-                    }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                  >
-                    Full Stack
-                  </motion.span>{" "}
+                  <Code size={20} className="text-[#00abf0]" />
+                  <span className="text-[#00abf0]">Full Stack</span>{" "}
                   Developer & AI Engineer
                 </h3>
 
@@ -929,18 +760,11 @@ const Portfolio = () => {
 
       {/* Education & Experience Section */}
       <section id="education" className="py-16 bg-[#041320] relative">
-        {/* Space-themed background effects */}
+        {/* Clean background */}
         <AnimatedGradient
-          colors={["#041320", "#0a1f32", "#072136", "#041320"]}
-          className="z-0 opacity-80"
+          colors={["#041320", "#0a1f32", "#041320"]}
+          className="z-0 opacity-60"
         />
-        <Starfield starCount={50} color="#00abf0" speed={0.3} />
-        <NebulaBackground
-          color1="rgba(0,171,240,0.08)"
-          color2="rgba(128,0,255,0.05)"
-          intensity={0.4}
-        />
-        <GalaxyAnimation starCount={30} galaxyCount={2} color="#00abf0" />
 
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
@@ -960,35 +784,15 @@ const Portfolio = () => {
             {/* Education Column */}
             <div>
               <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                >
-                  <BookOpen size={18} className="text-[#00abf0]" />
-                </motion.div>
-                <motion.span
-                  animate={{
-                    textShadow: [
-                      "0 0 3px rgba(0,171,240,0)",
-                      "0 0 8px rgba(0,171,240,0.5)",
-                      "0 0 3px rgba(0,171,240,0)",
-                    ],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-[#00abf0]"
-                >
+                <BookOpen size={18} className="text-[#00abf0]" />
+                <span className="text-[#00abf0]">
                   Education
-                </motion.span>
+                </span>
               </h3>
 
               <div className="space-y-6 relative">
-                {/* Timeline line with animated dots */}
+                {/* Timeline line */}
                 <div className="absolute left-2.5 top-1 bottom-0 w-0.5 bg-[#00abf0]/20"></div>
-                <MovingDotsOnLine
-                  count={3}
-                  direction="vertical"
-                  lineColor="rgba(0,171,240,0.2)"
-                />
 
                 {/* Timeline items */}
                 {[
@@ -1016,93 +820,31 @@ const Portfolio = () => {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
                     className="relative pl-8"
                   >
-                    {/* Timeline dot with pulse animation */}
+                    {/* Timeline dot */}
+                    <div className="absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 border-[#00abf0] bg-[#081b29]"></div>
+
                     <motion.div
-                      className="absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 border-[#00abf0] bg-[#081b29]"
-                      animate={{
-                        boxShadow: [
-                          "0 0 0 0 rgba(0,171,240,0)",
-                          "0 0 0 4px rgba(0,171,240,0.3)",
-                          "0 0 0 0 rgba(0,171,240,0)",
-                        ],
+                      whileHover={{
+                        y: -2,
+                        borderColor: "rgba(0,171,240,0.4)",
                       }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: index * 0.7,
-                      }}
-                    ></motion.div>
-
-                    <GlowingBorder intensity={0.2}>
-                      <motion.div
-                        whileHover={{
-                          y: -5,
-                          boxShadow: "0 10px 25px -5px rgba(0,171,240,0.3)",
-                          borderColor: "rgba(0,171,240,0.5)",
-                        }}
-                        className="bg-transparent backdrop-blur-sm rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/50 transition-all group overflow-hidden"
-                      >
-                        {/* Card content with starry background */}
-                        <div className="p-4 relative">
-                          {/* Mini starfield background for each card */}
-                          <div className="absolute inset-0 opacity-5">
-                            {Array.from({ length: 8 }).map((_, i) => {
-                              const size = Math.random() * 1.5 + 0.5;
-                              return (
-                                <motion.div
-                                  key={`star-${i}`}
-                                  className="absolute rounded-full bg-[#00abf0]"
-                                  style={{
-                                    width: size,
-                                    height: size,
-                                    left: `${Math.random() * 100}%`,
-                                    top: `${Math.random() * 100}%`,
-                                    boxShadow: `0 0 ${size}px ${
-                                      size / 2
-                                    }px #00abf0`,
-                                  }}
-                                  animate={{
-                                    opacity: [0.5, 1, 0.5],
-                                    scale: [1, 1.2, 1],
-                                  }}
-                                  transition={{
-                                    duration: 1 + Math.random() * 2,
-                                    repeat: Infinity,
-                                    delay: Math.random() * 2,
-                                  }}
-                                />
-                              );
-                            })}
-                          </div>
-
-                          <div className="text-[#00abf0] text-xs font-medium mb-1">
-                            {item.period}
-                          </div>
-                          <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
-                            {item.title}
-                          </h4>
-                          <p className="text-xs text-gray-400">
-                            {item.description}
-                          </p>
-
-                          {/* Decorative corner elements */}
-                          <motion.div
-                            className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-[#00abf0]/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                            animate={{
-                              opacity: [0, 1, 0],
-                              transition: {
-                                duration: 2,
-                                repeat: Infinity,
-                                delay: index * 0.3,
-                              },
-                            }}
-                          ></motion.div>
+                      className="bg-[#0a1f32]/30 backdrop-blur-sm rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/40 transition-all group"
+                    >
+                      <div className="p-4 relative">
+                        <div className="text-[#00abf0] text-xs font-medium mb-1">
+                          {item.period}
                         </div>
-                      </motion.div>
-                    </GlowingBorder>
+                        <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
+                          {item.title}
+                        </h4>
+                        <p className="text-xs text-gray-400">
+                          {item.description}
+                        </p>
+                      </div>
+                    </motion.div>
                   </motion.div>
                 ))}
               </div>
@@ -1111,35 +853,15 @@ const Portfolio = () => {
             {/* Experience Column */}
             <div>
               <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <motion.div
-                  animate={{ rotate: [0, -10, 10, 0] }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                >
-                  <Briefcase size={18} className="text-[#00abf0]" />
-                </motion.div>
-                <motion.span
-                  animate={{
-                    textShadow: [
-                      "0 0 3px rgba(0,171,240,0)",
-                      "0 0 8px rgba(0,171,240,0.5)",
-                      "0 0 3px rgba(0,171,240,0)",
-                    ],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-[#00abf0]"
-                >
+                <Briefcase size={18} className="text-[#00abf0]" />
+                <span className="text-[#00abf0]">
                   Experience
-                </motion.span>
+                </span>
               </h3>
 
               <div className="space-y-6 relative">
-                {/* Timeline line with animated dots */}
+                {/* Timeline line */}
                 <div className="absolute left-2.5 top-1 bottom-0 w-0.5 bg-[#00abf0]/20"></div>
-                <MovingDotsOnLine
-                  count={3}
-                  direction="vertical"
-                  lineColor="rgba(0,171,240,0.2)"
-                />
 
                 {/* Timeline items */}
                 {[
@@ -1167,93 +889,31 @@ const Portfolio = () => {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
                     className="relative pl-8"
                   >
-                    {/* Timeline dot with pulse animation */}
+                    {/* Timeline dot */}
+                    <div className="absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 border-[#00abf0] bg-[#081b29]"></div>
+
                     <motion.div
-                      className="absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 border-[#00abf0] bg-[#081b29]"
-                      animate={{
-                        boxShadow: [
-                          "0 0 0 0 rgba(0,171,240,0)",
-                          "0 0 0 4px rgba(0,171,240,0.3)",
-                          "0 0 0 0 rgba(0,171,240,0)",
-                        ],
+                      whileHover={{
+                        y: -2,
+                        borderColor: "rgba(0,171,240,0.4)",
                       }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: index * 0.7,
-                      }}
-                    ></motion.div>
-
-                    <GlowingBorder intensity={0.2}>
-                      <motion.div
-                        whileHover={{
-                          y: -5,
-                          boxShadow: "0 10px 25px -5px rgba(0,171,240,0.3)",
-                          borderColor: "rgba(0,171,240,0.5)",
-                        }}
-                        className="bg-transparent backdrop-blur-sm rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/50 transition-all group overflow-hidden"
-                      >
-                        {/* Card content with starry background */}
-                        <div className="p-4 relative">
-                          {/* Mini starfield background for each card */}
-                          <div className="absolute inset-0 opacity-5">
-                            {Array.from({ length: 8 }).map((_, i) => {
-                              const size = Math.random() * 1.5 + 0.5;
-                              return (
-                                <motion.div
-                                  key={`star-${i}`}
-                                  className="absolute rounded-full bg-[#00abf0]"
-                                  style={{
-                                    width: size,
-                                    height: size,
-                                    left: `${Math.random() * 100}%`,
-                                    top: `${Math.random() * 100}%`,
-                                    boxShadow: `0 0 ${size}px ${
-                                      size / 2
-                                    }px #00abf0`,
-                                  }}
-                                  animate={{
-                                    opacity: [0.5, 1, 0.5],
-                                    scale: [1, 1.2, 1],
-                                  }}
-                                  transition={{
-                                    duration: 1 + Math.random() * 2,
-                                    repeat: Infinity,
-                                    delay: Math.random() * 2,
-                                  }}
-                                />
-                              );
-                            })}
-                          </div>
-
-                          <div className="text-[#00abf0] text-xs font-medium mb-1">
-                            {item.period}
-                          </div>
-                          <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
-                            {item.title}
-                          </h4>
-                          <p className="text-xs text-gray-400">
-                            {item.description}
-                          </p>
-
-                          {/* Decorative corner elements */}
-                          <motion.div
-                            className="absolute bottom-2 right-2 w-4 h-4 border-b border-r border-[#00abf0]/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                            animate={{
-                              opacity: [0, 1, 0],
-                              transition: {
-                                duration: 2,
-                                repeat: Infinity,
-                                delay: index * 0.3,
-                              },
-                            }}
-                          ></motion.div>
+                      className="bg-[#0a1f32]/30 backdrop-blur-sm rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/40 transition-all group"
+                    >
+                      <div className="p-4 relative">
+                        <div className="text-[#00abf0] text-xs font-medium mb-1">
+                          {item.period}
                         </div>
-                      </motion.div>
-                    </GlowingBorder>
+                        <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
+                          {item.title}
+                        </h4>
+                        <p className="text-xs text-gray-400">
+                          {item.description}
+                        </p>
+                      </div>
+                    </motion.div>
                   </motion.div>
                 ))}
               </div>
@@ -1263,14 +923,12 @@ const Portfolio = () => {
       </section>
 
       {/* Skills Section */}
-      <section id="skills" className="py-16 relative">
-        {/* Advanced background effects */}
+      <section id="skills" className="py-16 relative bg-[#081b29]">
+        {/* Clean background */}
         <AnimatedGradient
-          colors={["#081b29", "#0a2942", "#081b29", "#072136"]}
-          className="z-0 opacity-90"
+          colors={["#081b29", "#0a1f32", "#081b29"]}
+          className="z-0 opacity-60"
         />
-        <DigitalCircuit color="#00abf0" speed={10} />
-        <GlowingOrbs count={3} color="#00abf0" minSize={100} maxSize={300} />
 
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
@@ -1289,25 +947,10 @@ const Portfolio = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
               <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <motion.div
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                >
-                  <Code size={18} className="text-[#00abf0]" />
-                </motion.div>
-                <motion.span
-                  animate={{
-                    textShadow: [
-                      "0 0 3px rgba(0,171,240,0)",
-                      "0 0 8px rgba(0,171,240,0.5)",
-                      "0 0 3px rgba(0,171,240,0)",
-                    ],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-[#00abf0]"
-                >
+                <Code size={18} className="text-[#00abf0]" />
+                <span className="text-[#00abf0]">
                   Coding Skills
-                </motion.span>
+                </span>
               </h3>
 
               {/* Skill bars with enhanced animations */}
@@ -1334,52 +977,25 @@ const Portfolio = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="mb-4 group"
-                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  className="mb-4"
                 >
                   <div className="flex justify-between mb-1">
-                    <motion.span
-                      className="text-sm font-medium flex items-center gap-2"
-                      whileHover={{ x: 3 }}
-                    >
+                    <span className="text-sm font-medium flex items-center gap-2">
                       {skill.icon && (
-                        <motion.div
-                          animate={{ rotate: [0, 360] }}
-                          transition={{
-                            duration: 8,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                        >
-                          <Image
-                            src={skill.icon}
-                            alt={skill.name}
-                            width={14}
-                            height={14}
-                            className="opacity-80"
-                          />
-                        </motion.div>
+                        <Image
+                          src={skill.icon}
+                          alt={skill.name}
+                          width={14}
+                          height={14}
+                          className="opacity-80"
+                        />
                       )}
                       {skill.name}
-                    </motion.span>
-                    <motion.span
-                      className="text-xs text-[#00abf0]"
-                      animate={{
-                        textShadow: [
-                          "0 0 3px rgba(0,171,240,0)",
-                          "0 0 5px rgba(0,171,240,0.5)",
-                          "0 0 3px rgba(0,171,240,0)",
-                        ],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: index * 0.5,
-                      }}
-                    >
+                    </span>
+                    <span className="text-xs text-[#00abf0]">
                       {skill.percentage}%
-                    </motion.span>
+                    </span>
                   </div>
                   <div className="w-full bg-[#072136] rounded-full h-1.5 overflow-hidden relative">
                     <motion.div
@@ -1387,27 +1003,12 @@ const Portfolio = () => {
                       whileInView={{ width: `${skill.percentage}%` }}
                       viewport={{ once: true }}
                       transition={{
-                        duration: 1.5,
-                        delay: 0.3,
+                        duration: 1.2,
+                        delay: 0.2,
                         ease: "easeOut",
                       }}
                       className="h-1.5 rounded-full bg-gradient-to-r from-[#00abf0] to-[#0077b6] relative"
-                    >
-                      {/* Animated glow effect */}
-                      <motion.div
-                        className="absolute top-0 bottom-0 right-0 w-4 bg-white rounded-full opacity-0 group-hover:opacity-70"
-                        animate={{
-                          x: [100, -400],
-                          opacity: [0, 0.7, 0],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          repeatDelay: 1,
-                          ease: "easeInOut",
-                        }}
-                      />
-                    </motion.div>
+                    />
                   </div>
                 </motion.div>
               ))}
@@ -1415,28 +1016,13 @@ const Portfolio = () => {
 
             <div>
               <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <motion.div
-                  animate={{ rotate: [0, -10, 10, 0] }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                >
-                  <Briefcase size={18} className="text-[#00abf0]" />
-                </motion.div>
-                <motion.span
-                  animate={{
-                    textShadow: [
-                      "0 0 3px rgba(0,171,240,0)",
-                      "0 0 8px rgba(0,171,240,0.5)",
-                      "0 0 3px rgba(0,171,240,0)",
-                    ],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="text-[#00abf0]"
-                >
+                <Briefcase size={18} className="text-[#00abf0]" />
+                <span className="text-[#00abf0]">
                   Professional Skills
-                </motion.span>
+                </span>
               </h3>
 
-              {/* Skill bars with enhanced animations */}
+              {/* Skill bars */}
               {[
                 {
                   name: "AI Integration",
@@ -1452,52 +1038,25 @@ const Portfolio = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="mb-4 group"
-                  whileHover={{ scale: 1.01 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  className="mb-4"
                 >
                   <div className="flex justify-between mb-1">
-                    <motion.span
-                      className="text-sm font-medium flex items-center gap-2"
-                      whileHover={{ x: 3 }}
-                    >
+                    <span className="text-sm font-medium flex items-center gap-2">
                       {skill.icon && (
-                        <motion.div
-                          animate={{ rotate: [0, 360] }}
-                          transition={{
-                            duration: 8,
-                            repeat: Infinity,
-                            ease: "linear",
-                          }}
-                        >
-                          <Image
-                            src={skill.icon}
-                            alt={skill.name}
-                            width={14}
-                            height={14}
-                            className="opacity-80"
-                          />
-                        </motion.div>
+                        <Image
+                          src={skill.icon}
+                          alt={skill.name}
+                          width={14}
+                          height={14}
+                          className="opacity-80"
+                        />
                       )}
                       {skill.name}
-                    </motion.span>
-                    <motion.span
-                      className="text-xs text-[#00abf0]"
-                      animate={{
-                        textShadow: [
-                          "0 0 3px rgba(0,171,240,0)",
-                          "0 0 5px rgba(0,171,240,0.5)",
-                          "0 0 3px rgba(0,171,240,0)",
-                        ],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: index * 0.5,
-                      }}
-                    >
+                    </span>
+                    <span className="text-xs text-[#00abf0]">
                       {skill.percentage}%
-                    </motion.span>
+                    </span>
                   </div>
                   <div className="w-full bg-[#072136] rounded-full h-1.5 overflow-hidden relative">
                     <motion.div
@@ -1505,27 +1064,12 @@ const Portfolio = () => {
                       whileInView={{ width: `${skill.percentage}%` }}
                       viewport={{ once: true }}
                       transition={{
-                        duration: 1.5,
-                        delay: 0.3,
+                        duration: 1.2,
+                        delay: 0.2,
                         ease: "easeOut",
                       }}
                       className="h-1.5 rounded-full bg-gradient-to-r from-[#00abf0] to-[#0077b6] relative"
-                    >
-                      {/* Animated glow effect */}
-                      <motion.div
-                        className="absolute top-0 bottom-0 right-0 w-4 bg-white rounded-full opacity-0 group-hover:opacity-70"
-                        animate={{
-                          x: [100, -400],
-                          opacity: [0, 0.7, 0],
-                        }}
-                        transition={{
-                          duration: 2,
-                          repeat: Infinity,
-                          repeatDelay: 1,
-                          ease: "easeInOut",
-                        }}
-                      />
-                    </motion.div>
+                    />
                   </div>
                 </motion.div>
               ))}
@@ -1536,29 +1080,14 @@ const Portfolio = () => {
 
       {/* Projects Section */}
       <section id="projects" className="py-16 relative">
-        {/* Animated rain background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="rain-container">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <div
-                key={i}
-                className="rain-drop"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  animationDuration: `${Math.random() * 1 + 0.5}s`,
-                  animationDelay: `${Math.random() * 2}s`,
-                }}
-              ></div>
-            ))}
-          </div>
-        </div>
-
-        {/* Animated gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#081b29] via-[#0a2942] to-[#081b29] z-[-1]">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('/grid.svg')] bg-center"></div>
-          </div>
-        </div>
+        {/* Background with stars and rain */}
+        <AnimatedGradient
+          colors={["#081b29", "#0a2942", "#081b29", "#072136"]}
+          className="z-0 opacity-80"
+        />
+        <Starfield starCount={50} speed={0.3} />
+        <GalaxyAnimation starCount={25} galaxyCount={2} />
+        <RainAnimation density={15} color="rgba(0,171,240,0.4)" scrollTrigger={true} />
 
         <div className="container mx-auto px-6">
           <motion.div
@@ -1707,8 +1236,11 @@ const Portfolio = () => {
 
                       {/* Link button with enhanced styling */}
                       <div className="mt-auto">
-                        <motion.a
-                          href={project.link}
+                        <motion.button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setIsLoginDialogOpen(true);
+                          }}
                           whileHover={{
                             scale: 1.05,
                             boxShadow: "0 0 15px rgba(0,171,240,0.5)",
@@ -1717,7 +1249,7 @@ const Portfolio = () => {
                           className="inline-flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-r from-[#00abf0] to-[#0077b6] px-4 py-2 rounded-full hover:shadow-lg hover:shadow-[#00abf0]/20"
                         >
                           View Details <ExternalLink size={14} />
-                        </motion.a>
+                        </motion.button>
                       </div>
 
                       {/* Decorative corner elements */}
@@ -1754,7 +1286,10 @@ const Portfolio = () => {
             className="mt-10 flex justify-center"
           >
             <motion.button
-              onClick={() => handleNavClick("projects")}
+              onClick={(e) => {
+                e.preventDefault();
+                setIsLoginDialogOpen(true);
+              }}
               className="flex items-center gap-2 text-sm font-medium bg-[#072136] text-white px-6 py-3 rounded-full border border-[#00abf0]/30 hover:border-[#00abf0] transition-all hover:shadow-lg hover:shadow-[#00abf0]/20"
               whileHover={{
                 scale: 1.05,
@@ -1776,63 +1311,16 @@ const Portfolio = () => {
             transition={{ duration: 8, repeat: Infinity }}
           ></motion.div>
 
-          <motion.div
-            className="absolute bottom-20 -right-20 w-60 h-60 rounded-full bg-[#00abf0]/10 blur-3xl"
-            animate={{
-              x: [0, -30, 0],
-              y: [0, 30, 0],
-            }}
-            transition={{ duration: 10, repeat: Infinity }}
-          ></motion.div>
         </div>
-
-        {/* Add CSS for rain animation */}
-        <style jsx>{`
-          .rain-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-          }
-
-          .rain-drop {
-            position: absolute;
-            top: -20px;
-            width: 1px;
-            height: 20px;
-            background: linear-gradient(
-              to bottom,
-              transparent,
-              rgba(0, 171, 240, 0.5)
-            );
-            animation: rain-fall linear infinite;
-          }
-
-          @keyframes rain-fall {
-            0% {
-              transform: translateY(-20px);
-              opacity: 0;
-            }
-            10% {
-              opacity: 0.7;
-            }
-            100% {
-              transform: translateY(calc(100vh));
-              opacity: 0;
-            }
-          }
-        `}</style>
       </section>
 
       {/* Contact Section */}
       <section id="contact" className="py-16 bg-[#041320] relative">
-        {/* Advanced background effects */}
+        {/* Clean background */}
         <AnimatedGradient
-          colors={["#041320", "#072136", "#081b29", "#041320"]}
-          className="z-0 opacity-90"
+          colors={["#041320", "#0a1f32", "#041320"]}
+          className="z-0 opacity-60"
         />
-        <RainAnimation density={10} color="rgba(0,171,240,0.3)" />
-        <FloatingParticles count={15} color="#00abf0" size={1} opacity={0.3} />
 
         <div className="container mx-auto px-6 relative z-10">
           <motion.div
@@ -1898,97 +1386,87 @@ const Portfolio = () => {
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5 }}
+                  transition={{ duration: 0.3 }}
                 >
-                  <GlowingBorder intensity={0.2} className="rounded-lg">
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      required
-                      className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors backdrop-blur-sm"
-                    />
-                  </GlowingBorder>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                    required
+                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors backdrop-blur-sm"
+                  />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
+                  transition={{ duration: 0.3, delay: 0.1 }}
                 >
-                  <GlowingBorder intensity={0.2} className="rounded-lg">
-                    <input
-                      type="email"
-                      placeholder="Email Address"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      required
-                      className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors backdrop-blur-sm"
-                    />
-                  </GlowingBorder>
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors backdrop-blur-sm"
+                  />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
+                  transition={{ duration: 0.3, delay: 0.2 }}
                 >
-                  <GlowingBorder intensity={0.2} className="rounded-lg">
-                    <input
-                      type="tel"
-                      placeholder="Mobile Number"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                      required
-                      className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors backdrop-blur-sm"
-                    />
-                  </GlowingBorder>
+                  <input
+                    type="tel"
+                    placeholder="Mobile Number"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    required
+                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors backdrop-blur-sm"
+                  />
                 </motion.div>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
+                  transition={{ duration: 0.3, delay: 0.3 }}
                 >
-                  <GlowingBorder intensity={0.2} className="rounded-lg">
-                    <input
-                      type="text"
-                      placeholder="Email Subject"
-                      value={formData.subject}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subject: e.target.value })
-                      }
-                      required
-                      className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors backdrop-blur-sm"
-                    />
-                  </GlowingBorder>
+                  <input
+                    type="text"
+                    placeholder="Email Subject"
+                    value={formData.subject}
+                    onChange={(e) =>
+                      setFormData({ ...formData, subject: e.target.value })
+                    }
+                    required
+                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors backdrop-blur-sm"
+                  />
                 </motion.div>
               </div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                transition={{ duration: 0.3, delay: 0.4 }}
               >
-                <GlowingBorder intensity={0.2} className="rounded-lg">
-                  <textarea
-                    rows={4}
-                    placeholder="Your Message"
-                    value={formData.message}
-                    onChange={(e) =>
-                      setFormData({ ...formData, message: e.target.value })
-                    }
-                    required
-                    className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors resize-none backdrop-blur-sm"
-                  ></textarea>
-                </GlowingBorder>
+                <textarea
+                  rows={4}
+                  placeholder="Your Message"
+                  value={formData.message}
+                  onChange={(e) =>
+                    setFormData({ ...formData, message: e.target.value })
+                  }
+                  required
+                  className="w-full bg-[#072136] border border-[#00abf0]/20 rounded-lg p-2.5 text-sm text-white placeholder:text-gray-400 focus:outline-none focus:border-[#00abf0] transition-colors resize-none backdrop-blur-sm"
+                ></textarea>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -2119,7 +1597,7 @@ const Portfolio = () => {
       </footer>
 
       {/* Floating Action Buttons */}
-      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-50">
+      <div className="fixed bottom-6 right-6 flex flex-col gap-3 z-40">
         <AnimatePresence>
           {showScrollTop && (
             <motion.button
@@ -2133,7 +1611,9 @@ const Portfolio = () => {
             </motion.button>
           )}
         </AnimatePresence>
-        <ChatBot />
+        <div className="z-50">
+          <ChatBot />
+        </div>
       </div>
 
       {/* Contact Modal */}
@@ -2142,6 +1622,13 @@ const Portfolio = () => {
         onClose={() => setIsContactModalOpen(false)}
         initialSubject={contactSubject}
       />
+
+      {/* Login Dialog */}
+      <Dialog open={isLoginDialogOpen} onOpenChange={setIsLoginDialogOpen}>
+        <DialogContent className="max-w-[100vw] max-h-[100vh] w-full h-full p-0 overflow-hidden border-0 rounded-none sm:rounded-none">
+          <LoginPage onClose={() => setIsLoginDialogOpen(false)} />
+        </DialogContent>
+      </Dialog>
 
       {/* About Section - Keep your enhanced version */}
       {/* ... existing About section code ... */}

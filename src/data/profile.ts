@@ -49,8 +49,8 @@ export const profileData = {
   ],
   
   contact: {
-    email: "gloirembonyi4@gmail.com",
-    phone: "+2507860786",
+    email: "gloirembonyi@gmail.com",
+    phone: "+250786110786",
     linkedin: "https://www.linkedin.com/in/gloire-mbonyi-755788250/",
     github: "https://github.com/gloirembonyi",
   },

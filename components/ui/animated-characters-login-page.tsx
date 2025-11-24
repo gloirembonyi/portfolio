@@ -12,8 +12,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 import { Eye, EyeOff, Mail, Sparkles, X } from "lucide-react";
 
-import { cn } from "@/lib/utils";
-
 interface PupilProps {
 
   size?: number;
@@ -547,7 +545,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
       {onClose && (
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-50 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-background/80 backdrop-blur-sm p-2"
+          className="absolute top-4 right-4 z-50 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#00abf0] focus:ring-offset-2 bg-[#081b29]/80 backdrop-blur-sm p-2 text-white hover:text-[#00abf0]"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
@@ -556,19 +554,19 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
       {/* Left Content Section */}
 
-      <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-br from-primary/90 via-primary to-primary/80 p-12 text-primary-foreground">
+      <div className="relative hidden lg:flex flex-col justify-between bg-gradient-to-br from-[#081b29] via-[#0a1f32] to-[#041320] p-12 text-white">
 
         <div className="relative z-20">
 
           <div className="flex items-center gap-2 text-lg font-semibold">
 
-            <div className="size-8 rounded-lg bg-primary-foreground/10 backdrop-blur-sm flex items-center justify-center">
+            <div className="size-8 rounded-lg bg-[#00abf0]/20 backdrop-blur-sm flex items-center justify-center border border-[#00abf0]/30">
 
-              <Sparkles className="size-4" />
+              <Sparkles className="size-4 text-[#00abf0]" />
 
             </div>
 
-            <span>YourBrand</span>
+            <span className="text-[#00abf0]">Gloire Developer</span>
 
           </div>
 
@@ -908,21 +906,21 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
         </div>
 
-        <div className="relative z-20 flex items-center gap-8 text-sm text-primary-foreground/60">
+        <div className="relative z-20 flex items-center gap-8 text-sm text-gray-400">
 
-          <a href="#" className="hover:text-primary-foreground transition-colors">
+          <a href="#" className="hover:text-[#00abf0] transition-colors">
 
             Privacy Policy
 
           </a>
 
-          <a href="#" className="hover:text-primary-foreground transition-colors">
+          <a href="#" className="hover:text-[#00abf0] transition-colors">
 
             Terms of Service
 
           </a>
 
-          <a href="#" className="hover:text-primary-foreground transition-colors">
+          <a href="#" className="hover:text-[#00abf0] transition-colors">
 
             Contact
 
@@ -932,17 +930,17 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
         {/* Decorative elements */}
 
-        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:20px_20px]" />
+        <div className="absolute inset-0 bg-grid-[#00abf0]/[0.05] bg-[size:20px_20px]" />
 
-        <div className="absolute top-1/4 right-1/4 size-64 bg-primary-foreground/10 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 right-1/4 size-64 bg-[#00abf0]/10 rounded-full blur-3xl" />
 
-        <div className="absolute bottom-1/4 left-1/4 size-96 bg-primary-foreground/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 left-1/4 size-96 bg-[#00abf0]/5 rounded-full blur-3xl" />
 
       </div>
 
       {/* Right Login Section */}
 
-      <div className="flex items-center justify-center p-8 bg-background">
+      <div className="flex items-center justify-center p-8 bg-[#081b29]">
 
         <div className="w-full max-w-[420px]">
 
@@ -950,13 +948,13 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
           <div className="lg:hidden flex items-center justify-center gap-2 text-lg font-semibold mb-12">
 
-            <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="size-8 rounded-lg bg-[#00abf0]/20 flex items-center justify-center border border-[#00abf0]/30">
 
-              <Sparkles className="size-4 text-primary" />
+              <Sparkles className="size-4 text-[#00abf0]" />
 
             </div>
 
-            <span>YourBrand</span>
+            <span className="text-[#00abf0]">Gloire Developer</span>
 
           </div>
 
@@ -964,9 +962,9 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
           <div className="text-center mb-10">
 
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back!</h1>
+            <h1 className="text-3xl font-bold tracking-tight mb-2 text-white">Welcome back!</h1>
 
-            <p className="text-muted-foreground text-sm">Please enter your details</p>
+            <p className="text-gray-400 text-sm">Please enter your details</p>
 
           </div>
 
@@ -976,7 +974,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
             <div className="space-y-2">
 
-              <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+              <Label htmlFor="email" className="text-sm font-medium text-gray-300">Email</Label>
 
               <Input
 
@@ -998,7 +996,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
                 required
 
-                className="h-12 bg-background border-border/60 focus:border-primary"
+                className="h-12 bg-[#0a1f32] border-[#00abf0]/30 text-white placeholder:text-gray-500 focus:border-[#00abf0] focus:ring-[#00abf0]/20"
 
               />
 
@@ -1006,7 +1004,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
             <div className="space-y-2">
 
-              <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+              <Label htmlFor="password" className="text-sm font-medium text-gray-300">Password</Label>
 
               <div className="relative">
 
@@ -1024,7 +1022,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
                   required
 
-                  className="h-12 pr-10 bg-background border-border/60 focus:border-primary"
+                  className="h-12 pr-10 bg-[#0a1f32] border-[#00abf0]/30 text-white placeholder:text-gray-500 focus:border-[#00abf0] focus:ring-[#00abf0]/20"
 
                 />
 
@@ -1034,7 +1032,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
                   onClick={() => setShowPassword(!showPassword)}
 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#00abf0] transition-colors"
 
                 >
 
@@ -1064,7 +1062,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
                   htmlFor="remember"
 
-                  className="text-sm font-normal cursor-pointer"
+                  className="text-sm font-normal cursor-pointer text-gray-300"
 
                 >
 
@@ -1078,7 +1076,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
                 href="#"
 
-                className="text-sm text-primary hover:underline font-medium"
+                className="text-sm text-[#00abf0] hover:underline font-medium hover:text-[#0096c7]"
 
               >
 
@@ -1102,7 +1100,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
               type="submit" 
 
-              className="w-full h-12 text-base font-medium" 
+              className="w-full h-12 text-base font-medium bg-gradient-to-r from-[#00abf0] to-[#0077b6] hover:from-[#0096c7] hover:to-[#006a9e] text-white border-0" 
 
               size="lg" 
 
@@ -1124,7 +1122,7 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
               variant="outline" 
 
-              className="w-full h-12 bg-background border-border/60 hover:bg-accent"
+              className="w-full h-12 bg-[#0a1f32] border-[#00abf0]/30 hover:bg-[#00abf0]/10 text-white hover:border-[#00abf0]/50"
 
               type="button"
 
@@ -1140,11 +1138,11 @@ function LoginPage({ onClose }: LoginPageProps = {}) {
 
           {/* Sign Up Link */}
 
-          <div className="text-center text-sm text-muted-foreground mt-8">
+          <div className="text-center text-sm text-gray-400 mt-8">
 
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
 
-            <a href="#" className="text-foreground font-medium hover:underline">
+            <a href="#" className="text-[#00abf0] font-medium hover:underline hover:text-[#0096c7]">
 
               Sign Up
 

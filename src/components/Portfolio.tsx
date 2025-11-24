@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   Github,
@@ -20,6 +20,8 @@ import {
   ArrowUp,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import ChatBot from "./ChatBot";
 import ContactModal from "./ContactModal";
 import {
@@ -32,6 +34,11 @@ import {
 } from "./AnimationComponents";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Component as LoginPage } from "@/components/ui/animated-characters-login-page";
+
+// Register ScrollTrigger plugin
+if (typeof window !== "undefined") {
+  gsap.registerPlugin(ScrollTrigger);
+}
 
 const Portfolio = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -52,6 +59,12 @@ const Portfolio = () => {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [contactSubject, setContactSubject] = useState("");
   const [isLoginDialogOpen, setIsLoginDialogOpen] = useState(false);
+  
+  // Refs for GSAP animations
+  const journeySectionRef = useRef<HTMLDivElement>(null);
+  const journeyContainerRef = useRef<HTMLDivElement>(null);
+  const projectsSectionRef = useRef<HTMLDivElement>(null);
+  const projectsContainerRef = useRef<HTMLDivElement>(null);
 
   // Handle navigation click
   const handleNavClick = (sectionId: string) => {
@@ -95,6 +108,234 @@ const Portfolio = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // GSAP Animations for Journey and Projects sections
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const setupAnimations = () => {
+      // Journey Section - Horizontal Scroll Animation (Centered)
+      if (journeyContainerRef.current && journeySectionRef.current) {
+        const journeyItems = Array.from(journeyContainerRef.current.children) as HTMLElement[];
+        const containerWidth = journeyContainerRef.current.scrollWidth;
+        const viewportWidth = window.innerWidth;
+        const scrollDistance = Math.max(0, containerWidth - viewportWidth);
+        const centerOffset = (viewportWidth - containerWidth) / 2;
+        
+        if (scrollDistance > 0) {
+          // Set up horizontal scroll with centering
+          gsap.to(journeyContainerRef.current, {
+            x: centerOffset > 0 ? centerOffset : -scrollDistance,
+            ease: "none",
+            scrollTrigger: {
+              trigger: journeySectionRef.current,
+              start: "top top",
+              end: `+=${scrollDistance}`,
+              pin: true,
+              scrub: 1,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          });
+          
+          // Timeline animation removed
+
+          // Animate each journey item with enhanced effects
+          journeyItems.forEach((itemElement) => {
+            const card = itemElement.querySelector(".journey-card");
+            const badge = itemElement.querySelector(".journey-badge");
+            const period = itemElement.querySelector(".journey-period");
+            const title = itemElement.querySelector(".journey-title");
+            const description = itemElement.querySelector(".journey-description");
+            
+            // Initial state - make all items visible
+            gsap.set(itemElement, { opacity: 1, x: 0, scale: 1 });
+            if (card) gsap.set(card, { opacity: 1, y: 0, scale: 1 });
+            if (badge) gsap.set(badge, { opacity: 1, x: 0, scale: 1 });
+            if (period) gsap.set(period, { opacity: 1, y: 0 });
+            if (title) gsap.set(title, { opacity: 1, y: 0 });
+            if (description) gsap.set(description, { opacity: 1, y: 0 });
+
+            // Animate on scroll
+            ScrollTrigger.create({
+              trigger: journeySectionRef.current,
+              start: "top top",
+              end: `+=${scrollDistance}`,
+              scrub: 1.2,
+              onUpdate: (self) => {
+                const progress = self.progress;
+                const itemPosition = itemElement.offsetLeft;
+                const itemWidth = itemElement.offsetWidth;
+                const itemCenter = itemPosition + itemWidth / 2;
+                const scrollPosition = progress * scrollDistance;
+                const viewportCenter = scrollPosition + viewportWidth / 2;
+                
+                // Calculate visibility - keep all items fully visible
+                const distance = Math.abs(itemCenter - viewportCenter);
+                const visibility = Math.max(0.8, Math.min(1, 1 - distance / (viewportWidth * 1.2))); // Minimum 80% visibility
+                const normalizedVisibility = Math.pow(visibility, 0.8); // Less aggressive curve
+                
+                // Animate main item - keep fully visible
+                gsap.to(itemElement, {
+                  opacity: Math.max(0.9, normalizedVisibility), // Minimum 90% opacity
+                  x: 0,
+                  scale: 1,
+                  duration: 0.3,
+                  ease: "power2.out",
+                });
+
+                // Animate card - keep fully visible
+                if (card) {
+                  gsap.to(card, {
+                    opacity: Math.max(0.9, normalizedVisibility),
+                    y: 0,
+                    scale: 1,
+                    duration: 0.3,
+                    ease: "power2.out",
+                  });
+                }
+
+                // Animate badge - keep fully visible
+                if (badge) {
+                  const badgeVisibility = Math.max(0.9, normalizedVisibility);
+                  gsap.to(badge, {
+                    opacity: badgeVisibility,
+                    x: 0,
+                    scale: 1,
+                    duration: 0.3,
+                    ease: "power2.out",
+                  });
+                }
+
+                // Animate period - keep fully visible
+                if (period) {
+                  const periodVisibility = Math.max(0.9, normalizedVisibility);
+                  gsap.to(period, {
+                    opacity: periodVisibility,
+                    y: 0,
+                    duration: 0.3,
+                    ease: "power2.out",
+                  });
+                }
+
+                // Animate title - keep fully visible
+                if (title) {
+                  const titleVisibility = Math.max(0.9, normalizedVisibility);
+                  gsap.to(title, {
+                    opacity: titleVisibility,
+                    y: 0,
+                    duration: 0.3,
+                    ease: "power2.out",
+                  });
+                }
+
+                // Animate description - keep fully visible
+                if (description) {
+                  const descVisibility = Math.max(0.9, normalizedVisibility);
+                  gsap.to(description, {
+                    opacity: descVisibility,
+                    y: 0,
+                    duration: 0.3,
+                    ease: "power2.out",
+                  });
+                }
+              },
+            });
+          });
+        }
+      }
+
+      // Projects Section - Horizontal Slide Animation
+      if (projectsContainerRef.current && projectsSectionRef.current) {
+        const projectItems = Array.from(projectsContainerRef.current.children) as HTMLElement[];
+        const containerWidth = projectsContainerRef.current.scrollWidth;
+        const viewportWidth = window.innerWidth;
+        const scrollDistance = Math.max(0, containerWidth - viewportWidth);
+        
+        if (scrollDistance > 0) {
+          // Set up horizontal scroll for projects
+          gsap.to(projectsContainerRef.current, {
+            x: -scrollDistance,
+            ease: "none",
+            scrollTrigger: {
+              trigger: projectsSectionRef.current,
+              start: "top top",
+              end: `+=${scrollDistance}`,
+              pin: true,
+              scrub: 1,
+              anticipatePin: 1,
+              invalidateOnRefresh: true,
+            },
+          });
+
+          // Animate each project card
+          projectItems.forEach((itemElement) => {
+            const textElements = itemElement.querySelectorAll(".project-text");
+            
+            // Initial state
+            gsap.set(itemElement, { opacity: 0, scale: 0.9, x: 100 });
+            textElements.forEach((text) => {
+              gsap.set(text, { opacity: 0, y: 30, filter: "blur(8px)" });
+            });
+
+            // Animate on scroll
+            ScrollTrigger.create({
+              trigger: projectsSectionRef.current,
+              start: "top top",
+              end: `+=${scrollDistance}`,
+              scrub: 1,
+              onUpdate: (self) => {
+                const progress = self.progress;
+                const itemPosition = itemElement.offsetLeft;
+                const itemWidth = itemElement.offsetWidth;
+                const itemCenter = itemPosition + itemWidth / 2;
+                const scrollPosition = progress * scrollDistance;
+                const viewportCenter = scrollPosition + viewportWidth / 2;
+                
+                // Calculate visibility based on distance from viewport center - improved
+                const distance = Math.abs(itemCenter - viewportCenter);
+                const visibility = Math.max(0.7, Math.min(1, 1 - distance / (viewportWidth * 1.0))); // Minimum 70% visibility
+                
+                gsap.set(itemElement, {
+                  opacity: visibility,
+                  scale: 0.98 + visibility * 0.02,
+                  x: (1 - visibility) * 60,
+                });
+
+                // Animate text with blur effect - improved visibility
+                textElements.forEach((text, textIndex) => {
+                  const textVisibility = Math.max(0.8, visibility - textIndex * 0.05); // Minimum 80% visibility
+                  gsap.set(text, {
+                    opacity: textVisibility,
+                    y: (1 - textVisibility) * 15,
+                    filter: `blur(${Math.max(0, (1 - textVisibility) * 2)}px)`, // Minimal blur
+                  });
+                });
+              },
+            });
+          });
+        }
+      }
+    };
+
+    // Wait for next frame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      setTimeout(setupAnimations, 100);
+    });
+
+    return () => {
+      const journeySection = journeySectionRef.current;
+      const projectsSection = projectsSectionRef.current;
+      ScrollTrigger.getAll().forEach((trigger) => {
+        if (
+          (journeySection && trigger.vars.trigger === journeySection) ||
+          (projectsSection && trigger.vars.trigger === projectsSection)
+        ) {
+          trigger.kill();
+        }
+      });
+    };
+  }, []);
+
   // Handle hire me button click
   const handleHireMeClick = () => {
     setContactSubject("Job Opportunity");
@@ -119,7 +360,7 @@ const Portfolio = () => {
   };
 
   return (
-    <div className="bg-[#081b29] text-white min-h-screen overflow-x-hidden">
+    <div className="bg-[#081b29] text-white min-h-screen overflow-x-hidden scroll-smooth">
       {/* Navigation */}
       <header className="fixed top-0 w-full z-50 bg-[#081b29]/90 backdrop-blur-md border-b border-[#00abf0]/20">
         <div className="container mx-auto flex justify-between items-center py-3 px-6">
@@ -207,7 +448,7 @@ const Portfolio = () => {
       {/* Hero Section */}
       <section
         id="home"
-        className="min-h-screen flex items-center pt-16 pb-10 relative overflow-hidden"
+        className="min-h-screen flex items-center pt-20 pb-8 relative overflow-hidden"
       >
         {/* Advanced Space Background Effects */}
         <AnimatedGradient
@@ -224,14 +465,14 @@ const Portfolio = () => {
         <RainAnimation density={5} color="rgba(0,171,240,0.5)" scrollTrigger={true} />
 
         {/* Content */}
-        <div className="container mx-auto px-6 z-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
-          <div className="w-full md:w-1/2 space-y-4">
+        <div className="container mx-auto px-6 z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
+          <div className="w-full md:w-1/2 space-y-3">
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <div className="inline-block bg-[#00abf0]/10 px-3 py-1 rounded-full mb-2 backdrop-blur-sm border border-[#00abf0]/20">
+              <div className="inline-block bg-[#00abf0]/10 px-3 py-1 rounded-full backdrop-blur-sm border border-[#00abf0]/20">
                 <span className="text-[#00abf0] font-medium text-sm">
                   3+ Years of Experience
                 </span>
@@ -242,7 +483,7 @@ const Portfolio = () => {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight"
+              className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight"
             >
               Hi, I&apos;m{" "}
               <span className="text-[#00abf0] inline-block">
@@ -254,9 +495,9 @@ const Portfolio = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="space-y-3"
+              className="space-y-2"
             >
-              <h2 className="text-xl md:text-2xl font-medium text-gray-300">
+              <h2 className="text-lg md:text-xl font-medium text-gray-300">
                 <span className="text-[#00abf0]">
                   Full Stack Developer
                 </span>{" "}
@@ -265,7 +506,7 @@ const Portfolio = () => {
                   AI Engineer
                 </span>
               </h2>
-              <p className="text-gray-400 max-w-lg text-sm md:text-base backdrop-blur-sm bg-[#081b29]/30 p-3 rounded-lg border border-[#00abf0]/10">
+              <p className="text-gray-400 max-w-lg text-sm backdrop-blur-sm bg-[#081b29]/30 p-2.5 rounded-lg border border-[#00abf0]/10">
                 I specialize in building modern web applications and AI
                 integrations with a focus on performance, scalability, and
                 exceptional user experiences.
@@ -277,7 +518,7 @@ const Portfolio = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="flex flex-wrap gap-2 pt-2"
+              className="flex flex-wrap gap-2"
             >
               {[
                 { name: "React", icon: "/icons/react.svg" },
@@ -311,7 +552,7 @@ const Portfolio = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex flex-wrap gap-3 pt-2"
+              className="flex flex-wrap gap-3"
             >
               <motion.button
                 onClick={handleHireMeClick}
@@ -342,7 +583,7 @@ const Portfolio = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
-              className="flex space-x-3 pt-4"
+              className="flex space-x-3 pt-2"
             >
               {[
                 { icon: Github, link: "https://github.com/gloirembonyi" },
@@ -432,6 +673,21 @@ const Portfolio = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#00abf0]/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
+                  {/* Scanner animation - runs once on page load */}
+                  <motion.div
+                    className="absolute inset-0 z-20 pointer-events-none"
+                    initial={{ y: "-100%" }}
+                    animate={{ y: "100%" }}
+                    transition={{
+                      duration: 1.5,
+                      delay: 0.8,
+                      ease: "easeInOut",
+                      repeat: 0,
+                    }}
+                  >
+                    <div className="w-full h-1 bg-gradient-to-b from-transparent via-[#00abf0] to-transparent opacity-80 shadow-[0_0_20px_rgba(0,171,240,0.8)]"></div>
+                  </motion.div>
+
                   {/* Digital circuit overlay on hover */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-300">
                     <DigitalCircuit
@@ -465,7 +721,7 @@ const Portfolio = () => {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-16 relative overflow-hidden bg-[#081b29]">
+      <section id="about" className="py-12 relative overflow-hidden bg-[#081b29] scroll-smooth">
         {/* Clean background */}
         <AnimatedGradient
           colors={["#081b29", "#0a1f32", "#081b29"]}
@@ -478,7 +734,7 @@ const Portfolio = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="mb-16 text-center"
+            className="mb-10 text-center"
           >
             <h2 className="text-4xl font-bold">
               About <span className="text-[#00abf0]">Me</span>
@@ -758,8 +1014,12 @@ const Portfolio = () => {
         `}</style>
       </section>
 
-      {/* Education & Experience Section */}
-      <section id="education" className="py-16 bg-[#041320] relative">
+      {/* Education & Experience Section - Horizontal Scroll */}
+      <section 
+        id="education" 
+        ref={journeySectionRef}
+        className="py-12 bg-[#041320] relative overflow-hidden"
+      >
         {/* Clean background */}
         <AnimatedGradient
           colors={["#041320", "#0a1f32", "#041320"]}
@@ -772,158 +1032,114 @@ const Portfolio = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="mb-12 text-center"
+            className="mb-8 text-center"
           >
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-2xl md:text-3xl font-bold">
               My <span className="text-[#00abf0]">Journey</span>
             </h2>
-            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
+            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-2"></div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Education Column */}
-            <div>
-              <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <BookOpen size={18} className="text-[#00abf0]" />
-                <span className="text-[#00abf0]">
-                  Education
-                </span>
-              </h3>
-
-              <div className="space-y-6 relative">
-                {/* Timeline line */}
-                <div className="absolute left-2.5 top-1 bottom-0 w-0.5 bg-[#00abf0]/20"></div>
-
-                {/* Timeline items */}
-                {[
-                  {
-                    period: "2021 - Present",
-                    title: "Computer Science - University",
-                    description:
-                      "Studying advanced programming concepts, algorithms, and artificial intelligence with a focus on practical applications.",
-                  },
-                  {
-                    period: "2019 - 2021",
-                    title: "Web Development Bootcamp",
-                    description:
-                      "Intensive training in modern web technologies including React, Node.js, and database management.",
-                  },
-                  {
-                    period: "2018 - 2019",
-                    title: "Self-taught Programming",
-                    description:
-                      "Started learning programming fundamentals through online courses and personal projects.",
-                  },
-                ].map((item, index) => (
-                  <motion.div
-                    key={`education-${index}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className="relative pl-8"
-                  >
-                    {/* Timeline dot */}
-                    <div className="absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 border-[#00abf0] bg-[#081b29]"></div>
-
-                    <motion.div
-                      whileHover={{
-                        y: -2,
-                        borderColor: "rgba(0,171,240,0.4)",
-                      }}
-                      className="bg-[#0a1f32]/30 backdrop-blur-sm rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/40 transition-all group"
-                    >
-                      <div className="p-4 relative">
-                        <div className="text-[#00abf0] text-xs font-medium mb-1">
-                          {item.period}
+          {/* Horizontal Scrolling Container - Centered */}
+          <div className="relative overflow-visible">
+            {/* Timeline line removed */}
+            
+            <div 
+              ref={journeyContainerRef}
+              className="flex gap-8 w-max mx-auto justify-center relative z-10"
+              style={{ willChange: "transform" }}
+            >
+              {/* Combined Education and Experience Items */}
+              {[
+              {
+                type: "education",
+                icon: BookOpen,
+                period: "2021 - Present",
+                title: "Computer Science - University",
+                description:
+                  "Studying advanced programming concepts, algorithms, and artificial intelligence with a focus on practical applications.",
+              },
+              {
+                type: "experience",
+                icon: Briefcase,
+                period: "2023 - Present",
+                title: "Developer - GKK (Global Kwik Koders)",
+                description:
+                  "Working on full stack web applications and AI integrations, developing solutions for clients across various industries.",
+              },
+              {
+                type: "education",
+                icon: BookOpen,
+                period: "2019 - 2021",
+                title: "Web Development Bootcamp",
+                description:
+                  "Intensive training in modern web technologies including React, Node.js, and database management.",
+              },
+              {
+                type: "experience",
+                icon: Briefcase,
+                period: "2021 - 2023",
+                title: "Frontend Developer - Tech Solutions",
+                description:
+                  "Developed responsive user interfaces and implemented interactive features for web applications.",
+              },
+              {
+                type: "education",
+                icon: BookOpen,
+                period: "2018 - 2019",
+                title: "Self-taught Programming",
+                description:
+                  "Started learning programming fundamentals through online courses and personal projects.",
+              },
+              {
+                type: "experience",
+                icon: Briefcase,
+                period: "2020 - 2021",
+                title: "Freelance Web Developer",
+                description:
+                  "Created websites and web applications for small businesses and startups.",
+              },
+            ].map((item, index) => {
+              const IconComponent = item.icon;
+              return (
+                <div
+                  key={`journey-${index}`}
+                  className="w-[90vw] max-w-[400px] flex-shrink-0 journey-item relative"
+                  style={{ willChange: "transform" }}
+                >
+                  <div className="bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 hover:border-[#00abf0]/30 transition-all duration-500 group p-8 h-full flex flex-col journey-card relative z-10 hover:bg-white/10 hover:-translate-y-2 hover:shadow-2xl hover:shadow-[#00abf0]/10">
+                      {/* Type badge */}
+                      <div className="flex items-center gap-2 mb-6 journey-badge">
+                        <div className="p-2 rounded-lg bg-[#00abf0]/10 text-[#00abf0] group-hover:bg-[#00abf0] group-hover:text-white transition-colors duration-300">
+                          <IconComponent size={20} />
                         </div>
-                        <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
-                          {item.title}
-                        </h4>
-                        <p className="text-xs text-gray-400">
-                          {item.description}
-                        </p>
+                        <span className="text-xs font-bold text-[#00abf0] uppercase tracking-widest group-hover:text-white/80 transition-colors">
+                          {item.type}
+                        </span>
                       </div>
-                    </motion.div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
 
-            {/* Experience Column */}
-            <div>
-              <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                <Briefcase size={18} className="text-[#00abf0]" />
-                <span className="text-[#00abf0]">
-                  Experience
-                </span>
-              </h3>
-
-              <div className="space-y-6 relative">
-                {/* Timeline line */}
-                <div className="absolute left-2.5 top-1 bottom-0 w-0.5 bg-[#00abf0]/20"></div>
-
-                {/* Timeline items */}
-                {[
-                  {
-                    period: "2023 - Present",
-                    title: "Developer - GKK (Global Kwik Koders)",
-                    description:
-                      "Working on full stack web applications and AI integrations, developing solutions for clients across various industries.",
-                  },
-                  {
-                    period: "2021 - 2023",
-                    title: "Frontend Developer - Tech Solutions",
-                    description:
-                      "Developed responsive user interfaces and implemented interactive features for web applications.",
-                  },
-                  {
-                    period: "2020 - 2021",
-                    title: "Freelance Web Developer",
-                    description:
-                      "Created websites and web applications for small businesses and startups.",
-                  },
-                ].map((item, index) => (
-                  <motion.div
-                    key={`experience-${index}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    className="relative pl-8"
-                  >
-                    {/* Timeline dot */}
-                    <div className="absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 border-[#00abf0] bg-[#081b29]"></div>
-
-                    <motion.div
-                      whileHover={{
-                        y: -2,
-                        borderColor: "rgba(0,171,240,0.4)",
-                      }}
-                      className="bg-[#0a1f32]/30 backdrop-blur-sm rounded-lg border border-[#00abf0]/20 hover:border-[#00abf0]/40 transition-all group"
-                    >
-                      <div className="p-4 relative">
-                        <div className="text-[#00abf0] text-xs font-medium mb-1">
-                          {item.period}
-                        </div>
-                        <h4 className="text-sm font-bold mb-1 group-hover:text-[#00abf0] transition-colors">
-                          {item.title}
-                        </h4>
-                        <p className="text-xs text-gray-400">
-                          {item.description}
-                        </p>
+                      {/* Content */}
+                      <div className="journey-text text-gray-400 text-sm font-medium mb-2 journey-period flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#00abf0]"></span>
+                        {item.period}
                       </div>
-                    </motion.div>
-                  </motion.div>
-                ))}
-              </div>
+                      <h4 className="journey-text text-2xl font-bold mb-4 text-white group-hover:text-[#00abf0] transition-colors journey-title">
+                        {item.title}
+                      </h4>
+                      <p className="journey-text text-sm text-gray-400 leading-relaxed journey-description group-hover:text-gray-300 transition-colors">
+                        {item.description}
+                      </p>
+                    </div>
+                </div>
+              );
+            })}
             </div>
           </div>
         </div>
       </section>
 
       {/* Skills Section */}
-      <section id="skills" className="py-16 relative bg-[#081b29]">
+      <section id="skills" className="py-12 relative bg-[#081b29] scroll-smooth">
         {/* Clean background */}
         <AnimatedGradient
           colors={["#081b29", "#0a1f32", "#081b29"]}
@@ -936,12 +1152,12 @@ const Portfolio = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="mb-12 text-center"
+            className="mb-8 text-center"
           >
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-2xl md:text-3xl font-bold">
               My <span className="text-[#00abf0]">Skills</span>
             </h2>
-            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
+            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-2"></div>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -1078,8 +1294,12 @@ const Portfolio = () => {
         </div>
       </section>
 
-      {/* Projects Section */}
-      <section id="projects" className="py-16 relative">
+      {/* Projects Section - Horizontal Scroll */}
+      <section 
+        id="projects" 
+        ref={projectsSectionRef}
+        className="py-12 relative overflow-hidden"
+      >
         {/* Background with stars and rain */}
         <AnimatedGradient
           colors={["#081b29", "#0a2942", "#081b29", "#072136"]}
@@ -1095,19 +1315,24 @@ const Portfolio = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="mb-12 text-center"
+            className="mb-6 text-center"
           >
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
               My <span className="text-[#00abf0]">Projects</span>
             </h2>
-            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
-            <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
+            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-2"></div>
+            <p className="text-gray-300 mt-2 max-w-2xl mx-auto text-sm drop-shadow-md">
               Explore some of my recent work showcasing my skills in web
               development, AI integration, and user experience design.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Horizontal Scrolling Container */}
+          <div 
+            ref={projectsContainerRef}
+            className="flex gap-4 w-max"
+            style={{ willChange: "transform" }}
+          >
             {[
               {
                 title: "MeetAI Platform",
@@ -1134,147 +1359,130 @@ const Portfolio = () => {
                 tags: ["React", "Tailwind CSS", "Authentication"],
                 color: "from-orange-500/20 to-red-600/20",
               },
+              {
+                title: "E-Commerce Platform",
+                description: "Full-stack e-commerce solution with payment integration",
+                image: "/projects/meet-ai.jpg",
+                link: "/projects",
+                tags: ["Next.js", "Stripe", "MongoDB"],
+                color: "from-purple-500/20 to-pink-600/20",
+              },
+              {
+                title: "Task Management App",
+                description: "Collaborative task management with real-time updates",
+                image: "/projects/plant-identify.png",
+                link: "/projects",
+                tags: ["React", "Socket.io", "PostgreSQL"],
+                color: "from-cyan-500/20 to-blue-600/20",
+              },
+              {
+                title: "Weather Dashboard",
+                description: "Real-time weather data visualization and forecasts",
+                image: "/projects/best-login-design.png",
+                link: "/projects",
+                tags: ["React", "API Integration", "Charts"],
+                color: "from-yellow-500/20 to-orange-600/20",
+              },
+              {
+                title: "Social Media Analytics",
+                description: "Analytics dashboard for social media metrics",
+                image: "/projects/meet-ai.jpg",
+                link: "/projects",
+                tags: ["React", "GraphQL", "D3.js"],
+                color: "from-indigo-500/20 to-purple-600/20",
+              },
+              {
+                title: "Fitness Tracker",
+                description: "Mobile-first fitness tracking with progress visualization",
+                image: "/projects/plant-identify.png",
+                link: "/projects",
+                tags: ["React Native", "Firebase", "Charts"],
+                color: "from-red-500/20 to-pink-600/20",
+              },
             ].map((project, index) => (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="w-[75vw] max-w-[320px] flex-shrink-0"
+                style={{ willChange: "transform" }}
               >
-                <motion.div
-                  whileHover={{
-                    y: -8,
-                    boxShadow: "0 20px 30px -15px rgba(0,171,240,0.3)",
-                  }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className="rounded-xl overflow-hidden border border-[#00abf0]/20 hover:border-[#00abf0]/50 transition-all duration-300 h-full backdrop-blur-sm relative"
-                >
-                  <div className="relative group h-full">
+                <div className="rounded-2xl overflow-hidden border border-white/10 hover:border-[#00abf0]/50 transition-all duration-500 h-full backdrop-blur-xl relative group hover:shadow-2xl hover:shadow-[#00abf0]/20 bg-[#0a1f32] hover:-translate-y-2">
+                  <div className="relative h-full min-h-[400px] flex flex-col">
                     {/* Background with image and overlay */}
                     <div className="absolute inset-0 z-0">
                       <Image
                         src={project.image}
                         alt={project.title}
                         fill
-                        className="object-cover opacity-40"
+                        className="object-cover opacity-60 group-hover:opacity-40 transition-opacity duration-500"
                       />
                       <div
-                        className={`absolute inset-0 bg-gradient-to-br ${project.color} mix-blend-multiply`}
+                        className={`absolute inset-0 bg-gradient-to-t from-[#081b29] via-[#081b29]/80 to-transparent opacity-90`}
                       ></div>
-                      <div className="absolute inset-0 bg-[#081b29]/70"></div>
-
+                      
                       {/* Animated particles */}
-                      <div className="absolute inset-0 overflow-hidden">
-                        {Array.from({ length: 8 }).map((_, i) => (
+                      <div className="absolute inset-0 overflow-hidden opacity-30 group-hover:opacity-50 transition-opacity">
+                        {Array.from({ length: 5 }).map((_, i) => (
                           <motion.div
                             key={i}
-                            className="absolute w-1 h-1 bg-[#00abf0]/40 rounded-full"
+                            className="absolute w-1 h-1 bg-white/40 rounded-full"
                             initial={{
                               x: Math.random() * 100 + "%",
                               y: Math.random() * 100 + "%",
                               opacity: Math.random() * 0.5 + 0.3,
                             }}
                             animate={{
-                              x: [
-                                Math.random() * 100 + "%",
-                                Math.random() * 100 + "%",
-                                Math.random() * 100 + "%",
-                              ],
                               y: [
                                 Math.random() * 100 + "%",
                                 Math.random() * 100 + "%",
-                                Math.random() * 100 + "%",
                               ],
+                              opacity: [0.2, 0.5, 0.2],
                             }}
                             transition={{
-                              duration: Math.random() * 20 + 10,
+                              duration: Math.random() * 10 + 10,
                               repeat: Infinity,
                               ease: "linear",
                             }}
                           />
                         ))}
                       </div>
-
-                      {/* Animated lines */}
-                      <div className="absolute inset-0 opacity-30">
-                        <div className="absolute top-[20%] left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00abf0]/50 to-transparent"></div>
-                        <div className="absolute top-[80%] left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00abf0]/30 to-transparent"></div>
-                        <div className="absolute bottom-0 top-0 left-[20%] w-px bg-gradient-to-b from-transparent via-[#00abf0]/50 to-transparent"></div>
-                        <div className="absolute bottom-0 top-0 left-[80%] w-px bg-gradient-to-b from-transparent via-[#00abf0]/30 to-transparent"></div>
-                      </div>
                     </div>
 
                     {/* Project details */}
-                    <div className="p-6 relative z-10 h-full flex flex-col">
-                      <motion.h3
-                        className="text-xl font-bold mb-2 text-white group-hover:text-[#00abf0] transition-colors"
-                        whileHover={{ x: 5 }}
-                      >
-                        {project.title}
-                      </motion.h3>
-                      <p className="text-sm text-gray-300 mb-4">
-                        {project.description}
-                      </p>
+                    <div className="p-8 relative z-10 h-full flex flex-col justify-end">
+                      <div className="transform transition-transform duration-500 group-hover:-translate-y-2">
+                        <div className="flex flex-wrap gap-2 mb-4 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-100 transform translate-y-4 group-hover:translate-y-0">
+                          {project.tags.map((tag, i) => (
+                            <span
+                              key={i}
+                              className="text-[10px] font-bold px-2 py-1 rounded bg-[#00abf0] text-white tracking-wider uppercase"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        
+                        <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-[#00abf0] transition-colors">
+                          {project.title}
+                        </h3>
+                        
+                        <p className="text-sm text-gray-300 mb-6 leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all">
+                          {project.description}
+                        </p>
 
-                      {/* Tags with enhanced styling */}
-                      <div className="flex flex-wrap gap-2 mb-5">
-                        {project.tags.map((tag, i) => (
-                          <motion.span
-                            key={i}
-                            whileHover={{
-                              y: -3,
-                              x: 2,
-                              backgroundColor: "rgba(0,171,240,0.3)",
-                            }}
-                            className="text-xs px-2 py-1 rounded-full bg-[#00abf0]/10 text-[#00abf0] border border-[#00abf0]/20 backdrop-blur-sm"
-                          >
-                            {tag}
-                          </motion.span>
-                        ))}
-                      </div>
-
-                      {/* Link button with enhanced styling */}
-                      <div className="mt-auto">
-                        <motion.button
+                        <button
                           onClick={(e) => {
                             e.preventDefault();
                             setIsLoginDialogOpen(true);
                           }}
-                          whileHover={{
-                            scale: 1.05,
-                            boxShadow: "0 0 15px rgba(0,171,240,0.5)",
-                          }}
-                          whileTap={{ scale: 0.95 }}
-                          className="inline-flex items-center gap-2 text-sm font-medium text-white bg-gradient-to-r from-[#00abf0] to-[#0077b6] px-4 py-2 rounded-full hover:shadow-lg hover:shadow-[#00abf0]/20"
+                          className="inline-flex items-center gap-2 text-sm font-bold text-[#00abf0] hover:text-white transition-colors group/btn"
                         >
-                          View Details <ExternalLink size={14} />
-                        </motion.button>
+                          View Project <ExternalLink size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                        </button>
                       </div>
-
-                      {/* Decorative corner elements */}
-                      <motion.div
-                        className="absolute bottom-2 right-2 w-8 h-8 border-b border-r border-[#00abf0]/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                        animate={{
-                          opacity: [0, 1, 0],
-                          transition: { duration: 2, repeat: Infinity },
-                        }}
-                      ></motion.div>
-                      <motion.div
-                        className="absolute top-2 left-2 w-8 h-8 border-t border-l border-[#00abf0]/40 opacity-0 group-hover:opacity-100 transition-opacity"
-                        animate={{
-                          opacity: [0, 1, 0],
-                          transition: {
-                            duration: 2,
-                            repeat: Infinity,
-                            delay: 1,
-                          },
-                        }}
-                      ></motion.div>
                     </div>
                   </div>
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             ))}
           </div>
 
@@ -1283,21 +1491,21 @@ const Portfolio = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-10 flex justify-center"
+            className="mt-6 flex justify-center"
           >
             <motion.button
               onClick={(e) => {
                 e.preventDefault();
-                setIsLoginDialogOpen(true);
+                handleNavClick("projects");
               }}
-              className="flex items-center gap-2 text-sm font-medium bg-[#072136] text-white px-6 py-3 rounded-full border border-[#00abf0]/30 hover:border-[#00abf0] transition-all hover:shadow-lg hover:shadow-[#00abf0]/20"
+              className="flex items-center gap-2 text-sm font-semibold bg-gradient-to-r from-[#00abf0] to-[#0077b6] text-white px-8 py-3 rounded-full border-2 border-[#00abf0]/50 hover:border-[#00abf0] transition-all hover:shadow-lg hover:shadow-[#00abf0]/40 drop-shadow-[0_4px_8px_rgba(0,0,0,0.6)]"
               whileHover={{
                 scale: 1.05,
-                boxShadow: "0 0 20px rgba(0,171,240,0.3)",
+                boxShadow: "0 0 25px rgba(0,171,240,0.5)",
               }}
               whileTap={{ scale: 0.95 }}
             >
-              View All Projects <ExternalLink size={14} />
+              View All Projects <ExternalLink size={16} />
             </motion.button>
           </motion.div>
 
@@ -1315,7 +1523,7 @@ const Portfolio = () => {
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-16 bg-[#041320] relative">
+      <section id="contact" className="py-12 bg-[#041320] relative scroll-smooth">
         {/* Clean background */}
         <AnimatedGradient
           colors={["#041320", "#0a1f32", "#041320"]}
@@ -1328,12 +1536,12 @@ const Portfolio = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
-            className="mb-12 text-center"
+            className="mb-8 text-center"
           >
-            <h2 className="text-3xl font-bold">
+            <h2 className="text-2xl md:text-3xl font-bold">
               Contact <span className="text-[#00abf0]">Me!</span>
             </h2>
-            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-3"></div>
+            <div className="w-16 h-0.5 bg-[#00abf0] mx-auto mt-2"></div>
           </motion.div>
 
           <div className="max-w-4xl mx-auto">
